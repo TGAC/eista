@@ -80,15 +80,31 @@ workflow PIPELINE_INITIALISATION {
     //
     // Create channel from input file provided through params.input
     //
+    // Channel
+    //     .fromSamplesheet("input")
+    //     .map {
+    //         meta, fastq_1, fastq_2 ->
+    //             if (!fastq_2) {
+    //                 return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
+    //             } else {
+    //                 return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ] ]
+    //             }
+    //     }
+    //     .groupTuple()
+    //     .map {
+    //         validateInputSamplesheet(it)
+    //     }
+    //     .map {
+    //         meta, fastqs ->
+    //             return [ meta, fastqs.flatten() ]
+    //     }
+    //     .set { ch_samplesheet }
+
     Channel
         .fromSamplesheet("input")
         .map {
-            meta, fastq_1, fastq_2 ->
-                if (!fastq_2) {
-                    return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
-                } else {
-                    return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ] ]
-                }
+            meta, data ->
+                return [ meta.id, meta, [ data ] ]
         }
         .groupTuple()
         .map {
