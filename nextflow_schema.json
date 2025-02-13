@@ -292,5 +292,43 @@
         {
             "$ref": "#/definitions/generic_options"
         }
-    ]
+    ],
+    "properties": {
+        "save_reference": {
+            "type": "boolean"
+        },
+        "analyses": {
+            "type": "string",
+            "default": "primary,secondary,tertiary"
+        },
+        "skip": {
+            "type": "string"
+        },
+        "technology": {
+            "type": "string",
+            "default": "vizgen"
+        },
+        "boundaries": {
+            "type": "string"
+        },
+        "segmentation_algorithm": {
+            "type": "string"
+        },
+        "tile_size": {
+            "type": "integer",
+            "default": 2400
+        },
+        "tile_overlap": {
+            "type": "integer",
+            "default": 200
+        },
+        "run_analyses": {
+            "type": "string",
+            "default": "['primary', 'secondary', 'tertiary']"
+        },
+        "skip_analyses": {
+            "type": "string",
+            "default": "[]"
+        }
+    }
 }

@@ -11,6 +11,10 @@ include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pi
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_eista_pipeline'
 
+include { VPT_SEGMENTATION } from '../modules/local/vpt_segmentation'
+include { VPT_PARTITION } from '../modules/local/vpt_partition'
+include { VPT_METADATA } from '../modules/local/vpt_metadata'
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -30,11 +34,62 @@ workflow EISTA {
     //
     // MODULE: Run FastQC
     //
-    FASTQC (
-        ch_samplesheet
-    )
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]})
-    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+    // FASTQC (
+    //     ch_samplesheet
+    // )
+    // ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]})
+    // ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+
+
+
+    //===================================== Primary anaysis stage =====================================
+
+    if (params.run_analyses.contains('primary')){
+
+        if (params.technology == "vizgen") {
+            if (!params.skip_analyses.contains('segmentation_partition_metadata')) {
+                VPT_SEGMENTATION (
+                    ch_samplesheet,
+                    // Channel.fromPath(params.input)
+                    // MTX_CONVERSION.out.h5ad
+                )
+                ch_versions = ch_versions.mix(VPT_SEGMENTATION.out.versions)
+                ch_parquet = VPT_SEGMENTATION.out.parquet 
+
+                VPT_PARTITION (
+                    ch_parquet,
+                )
+                ch_versions = ch_versions.mix(VPT_PARTITION.out.versions)
+                ch_counts = VPT_PARTITION.out.counts
+
+                VPT_METADATA (
+                    ch_parquet,
+                    ch_counts,
+                )
+                ch_versions = ch_versions.mix(VPT_METADATA.out.versions)
+                ch_metadata = VPT_METADATA.out.metadata
+
+            }
+        }
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     //
     // Collate and save software versions
@@ -79,15 +134,15 @@ workflow EISTA {
         )
     )
 
-    MULTIQC (
-        ch_multiqc_files.collect(),
-        ch_multiqc_config.toList(),
-        ch_multiqc_custom_config.toList(),
-        ch_multiqc_logo.toList()
-    )
+    // MULTIQC (
+    //     ch_multiqc_files.collect(),
+    //     ch_multiqc_config.toList(),
+    //     ch_multiqc_custom_config.toList(),
+    //     ch_multiqc_logo.toList()
+    // )
 
     emit:
-    multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    // multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
 }
 
