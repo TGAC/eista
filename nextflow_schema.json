@@ -323,11 +323,11 @@
             "default": 200
         },
         "run_analyses": {
-            "type": "string",
+            "type": "array",
             "default": "['primary', 'secondary', 'tertiary']"
         },
         "skip_analyses": {
-            "type": "string",
+            "type": "array",
             "default": "[]"
         }
     }

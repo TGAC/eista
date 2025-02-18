@@ -1,4 +1,4 @@
-process VPT_PARTITION {
+process VPT_SUM_SIGNALS {
     tag "$meta.id"
     label 'process_high'
 
@@ -12,8 +12,7 @@ process VPT_PARTITION {
     tuple val(meta), path(parquet)
 
     output:
-    tuple val(meta), path("cell_by_gene.csv"), emit: counts
-    tuple val(meta), path("detected_transcripts.csv"), emit: transcripts
+    tuple val(meta), path("sum_signals.csv"), emit: signals
     path  "versions.yml", emit: versions
 
     when:
@@ -22,16 +21,17 @@ process VPT_PARTITION {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def transcripts = "${data}/detected_transcripts.csv"
+    def images = """${data}/images/mosaic_(?P<stain>[\\w|-]+)_z(?P<z>[0-9]+).tif"""
+    def micron_to_mosaic = "${data}/images/micron_to_mosaic_pixel_transform.csv"
 
 
     """
     vpt \\
-        --processes ${task.cpus} partition-transcripts \\
+        --processes ${task.cpus} sum-signals \\
+        --input-images="${images}" \\
         --input-boundaries ${parquet} \\
-        --input-transcripts ${transcripts} \\
-        --output-entity-by-gene cell_by_gene.csv \\
-        --output-transcripts detected_transcripts.csv \\
+        --input-micron-to-mosaic ${micron_to_mosaic} \\
+        --output-csv sum_signals.csv \\
         $args \\
 
     cat <<-END_VERSIONS > versions.yml

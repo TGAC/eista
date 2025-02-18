@@ -5,7 +5,7 @@ process VPT_SEGMENTATION {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/vpt:1.3' :
-        'vzgdocker/vpt:1.3' }"
+        'docker.io/vzgdocker/vpt:1.3' }"
 
     input:
     tuple val(meta), path(data)
@@ -20,10 +20,12 @@ process VPT_SEGMENTATION {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def algorithm =  (params.segmentation_algorithm) ?: new File("${workflow.projectDir}/assets/algorithms/cellpose_default_1_ZLevel.json").text
-    def images = new File("${data}/mosaic_(?P<stain>[\w|-]+)_z(?P<z>[0-9]+).tif").text
-    def micron_to_mosaic = new File("${data}/images/micron_to_mosaic_pixel_transform.csv").text
-    if(!micron_to_mosaic.exists()) {micron_to_mosaic = new File("${data}/micron_to_mosaic_pixel_transform.csv").text
+    // def algorithm = (params.segmentation_algorithm)?: new File("${workflow.projectDir}/assets/algorithms/cellpose_default_1_ZLevel.json").text
+    def algorithm = (params.segmentation_algorithm)?: "${workflow.projectDir}/assets/algorithms/cellpose_default_1_ZLevel.json"
+    // def images = new File("${data}/mosaic_(?P<stain>[\w|-]+)_z(?P<z>[0-9]+).tif").text
+    def images = """${data}/images/mosaic_(?P<stain>[\\w|-]+)_z(?P<z>[0-9]+).tif"""
+    def micron_to_mosaic = "${data}/images/micron_to_mosaic_pixel_transform.csv"
+    // if(!new File(micron_to_mosaic).exists()) {micron_to_mosaic = "${data}/micron_to_mosaic_pixel_transform.csv"}
 
     """
     vpt \\
@@ -34,6 +36,7 @@ process VPT_SEGMENTATION {
         --output-path "./" \\
         --tile-size ${params.tile_size} \\
         --tile-overlap ${params.tile_overlap} \\
+        --overwrite \\
         $args \\
 
     cat <<-END_VERSIONS > versions.yml

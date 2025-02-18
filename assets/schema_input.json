@@ -13,21 +13,21 @@
                 "errorMessage": "Sample name must be provided and cannot contain spaces",
                 "meta": ["id"]
             },
-            "fastq_1": {
+            "data": {
                 "type": "string",
-                "format": "file-path",
+                "format": "directory",
                 "exists": true,
-                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "errorMessage": "input folder for vizgen raw data"
             },
-            "fastq_2": {
+            "merge": {
                 "type": "string",
-                "format": "file-path",
-                "exists": true,
-                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
-            }
+                "meta": ["merge"]
+            },
+            "group": {
+                "type": "string",
+                "meta": ["group"]
+            }   
         },
-        "required": ["sample", "fastq_1"]
+        "required": ["sample", "data"]
     }
 }

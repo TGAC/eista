@@ -5,7 +5,7 @@ process VPT_METADATA {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/vpt:1.3' :
-        'vzgdocker/vpt:1.3' }"
+        'docker.io/vzgdocker/vpt:1.3' }"
 
     input:
     tuple val(meta), path(parquet)

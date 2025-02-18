@@ -1,6 +1,6 @@
-process VPT_PARTITION {
+process VPT_UPDATE_VZG {
     tag "$meta.id"
-    label 'process_high'
+    label 'process_process_low'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -10,10 +10,11 @@ process VPT_PARTITION {
     input:
     tuple val(meta), path(data)
     tuple val(meta), path(parquet)
+    tuple val(meta), path(counts)
+    tuple val(meta), path(metadata)
 
     output:
-    tuple val(meta), path("cell_by_gene.csv"), emit: counts
-    tuple val(meta), path("detected_transcripts.csv"), emit: transcripts
+    tuple val(meta), path($vzg_filename), emit: vzg
     path  "versions.yml", emit: versions
 
     when:
@@ -22,16 +23,18 @@ process VPT_PARTITION {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def transcripts = "${data}/detected_transcripts.csv"
+    def vzg = "${data}/*.vzg"
+    def vzg_filename = 'update_' + new File(vzg).getName()
 
 
     """
     vpt \\
-        --processes ${task.cpus} partition-transcripts \\
+        --processes ${task.cpus} update-vzg \\
+        --input-vzg ${vzg} \\
         --input-boundaries ${parquet} \\
-        --input-transcripts ${transcripts} \\
-        --output-entity-by-gene cell_by_gene.csv \\
-        --output-transcripts detected_transcripts.csv \\
+        --input-entity-by-gene ${counts} \\
+        --input-metadata ${metadata} \\
+        --output-csv ${vzg_filename} \\
         $args \\
 
     cat <<-END_VERSIONS > versions.yml

@@ -14,6 +14,8 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_eist
 include { VPT_SEGMENTATION } from '../modules/local/vpt_segmentation'
 include { VPT_PARTITION } from '../modules/local/vpt_partition'
 include { VPT_METADATA } from '../modules/local/vpt_metadata'
+include { VPT_SUM_SIGNALS } from '../modules/local/vpt_sum_signals'
+include { VPT_UPDATE_VZG } from '../modules/local/vpt_update_vzg'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -57,6 +59,7 @@ workflow EISTA {
                 ch_parquet = VPT_SEGMENTATION.out.parquet 
 
                 VPT_PARTITION (
+                    ch_samplesheet,
                     ch_parquet,
                 )
                 ch_versions = ch_versions.mix(VPT_PARTITION.out.versions)
@@ -70,6 +73,27 @@ workflow EISTA {
                 ch_metadata = VPT_METADATA.out.metadata
 
             }
+
+            if (!params.skip_analyses.contains('sum_signals')) {
+                VPT_SUM_SIGNALS (
+                    ch_samplesheet,
+                    ch_parquet,
+                )
+                ch_versions = ch_versions.mix(VPT_SUM_SIGNALS.out.versions)
+                ch_signals = VPT_SUM_SIGNALS.out.signals
+            }
+
+            if (!params.skip_analyses.contains('update_vzg')) {
+                VPT_UPDATE_VZG (
+                    ch_samplesheet,
+                    ch_parquet,
+                    ch_counts,
+                    ch_metadata,
+                )
+                ch_versions = ch_versions.mix(VPT_UPDATE_VZG.out.versions)
+                // ch_vzg = VPT_UPDATE_VZG.out.vzg
+            }
+
         }
 
     }
@@ -134,15 +158,15 @@ workflow EISTA {
         )
     )
 
-    // MULTIQC (
-    //     ch_multiqc_files.collect(),
-    //     ch_multiqc_config.toList(),
-    //     ch_multiqc_custom_config.toList(),
-    //     ch_multiqc_logo.toList()
-    // )
+    MULTIQC (
+        ch_multiqc_files.collect(),
+        ch_multiqc_config.toList(),
+        ch_multiqc_custom_config.toList(),
+        ch_multiqc_logo.toList()
+    )
 
     emit:
-    // multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
 }
 
