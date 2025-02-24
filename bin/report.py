@@ -18,8 +18,8 @@ import sys
 
 logger = util.get_named_logger('Report')
 
-report_title = 'EI Single Cell Analysis Report'
-workflow_name = 'eisca'
+report_title = 'EI Spatial Transcriptomics Analysis Report'
+workflow_name = 'eista'
 
 
 def parse_args(argv=None):
@@ -152,8 +152,7 @@ def main(argv=None):
             html.p("""This section gives an overall summary of the single-cell count matrix for 
                    each sample. The statistics include the total number of cells with at least 
                    one gene expressed, the total number of genes expressed in at least one cell, 
-                   the median number of genes per cell, and the median percentage of counts in 
-                   mitochondrial genes (pct-mt).""")
+                   the median number of genes per cell, and the volume of segmented cells.""")
             DataTable.from_pandas(summary)   
 
         with report.add_section('Quantification QC', 'QC'):
@@ -161,12 +160,14 @@ def main(argv=None):
                    the quantification step. These plots provide insight into the quality of the 
                    experiments and guide the filtering of low-quality cells.""")
             html.p("""The following scatter plot shows the relationship between total 
-                   read counts and the number of genes, with the percentage of counts in 
-                   mitochondrial genes indicated by color.""")
+                   read counts and the number of genes, with the volume of segmented cells indicated by color.""")
             plots_from_image_files(path_quant_qc_raw, meta='sample', widths=['800'], suffix=['scatter*.png'])
             html.p("""The following violin plots display the distribution of cells based on the number of 
-                   genes, total counts, and the percentage of counts in mitochondrial genes.""")
+                   genes, total counts, and cell volumes.""")
             plots_from_image_files(path_quant_qc_raw, meta='sample', ncol=3, suffix=['violin*.png'])
+            html.p("""The following histogram plots display the distribution of cells based on the number of 
+                   genes, total counts, and cell volumes.""")
+            plots_from_image_files(path_quant_qc_raw, meta='sample', suffix=['histograms.png'])
     else:
         logger.info('Skipping Quantification QC')
 
@@ -175,24 +176,22 @@ def main(argv=None):
         with report.add_section('Cell filtering', 'Cell filtering'):
             html.p("""This section presents the statistics and QC plots after cell filtering process. 
                    The filtering process includes hard thresholds for minimum genes, minimum counts, 
-                   minimum cells and the percentage of counts in mitochondrial genes. Additionally, 
-                   users can set quantile limits on the number of genes. Then doublet detection is 
-                   performed using Scrublet.""")
+                   minimum cells and the volume of segmented cells. Additionally, 
+                   users can set quantile limits on the number of genes.""")
             html.p("""The following table shows summary statistics, with percentages in brackets 
                    indicating the comparison to the raw counts.""")
             DataTable.from_pandas(summary)
             html.p("""The following violin plots display the distribution of cells based on the number of 
-                   genes, total counts, and the percentage of counts in mitochondrial genes after filtering.""")
+                   genes, total counts, and cell volumes after filtering.""")
             plots_from_image_files(path_cell_filtering, meta='sample', ncol=3, suffix=['violin*.png'])            
-            # html.p("""The following plots show the distribution KDE curves before and after filtering 
-            #        for the number of genes, total counts, and the percentage of counts in mitochondrial genes.""")            
-            # plots_from_image_files(path_cell_filtering, meta='sample', ncol=2, suffix=['dist*.png'])
-            html.p("""The following plots show the UMAP plots
-                   for the number of genes, total counts, and the percentage of counts in mitochondrial genes.""")                        
+            html.p("""The following histogram plots display the distribution of cells based on the number of 
+                   genes, total counts, and cell volumes.""")
+            plots_from_image_files(path_cell_filtering, meta='sample', suffix=['histograms.png'])
+            html.p("""The following plots show the UMAP plots for the number of genes, total counts.""")                        
             plots_from_image_files(path_cell_filtering, meta='sample', suffix=['umap_total*.png'])
-            if util.check_file(f"{path_cell_filtering}/sample_*", 'umap_doublet.png'):
-                html.p("""The following plots show the UMAP plots for the predicted doublets and doublet scores.""")                        
-                plots_from_image_files(path_cell_filtering, meta='sample', suffix=['umap_doublet.png'])
+            # if util.check_file(f"{path_cell_filtering}/sample_*", 'umap_doublet.png'):
+            #     html.p("""The following plots show the UMAP plots for the predicted doublets and doublet scores.""")                        
+            #     plots_from_image_files(path_cell_filtering, meta='sample', suffix=['umap_doublet.png'])
             show_analysis_parameters(f"{path_quant_qc}/parameters.json")          
     else:
         logger.info('Skipping Cell filtering')

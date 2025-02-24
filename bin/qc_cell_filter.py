@@ -214,7 +214,7 @@ def main(argv=None):
 
         with plt.rc_context():
             sc.pl.scatter(adata_s, "total_counts", "n_genes_by_counts", color="volume", show=False)
-            plt.savefig(Path(path_sample, 'scatter_total_counts_genes.png'), bbox_inches="tight")
+            plt.savefig(Path(path_sample, 'scatter_counts_genes_volume.png'), bbox_inches="tight")
 
         # violin plots for n_genes_by_counts, total_counts, volume
         path_sample = Path(path_quant_qc_raw, f"sample_{sid}")

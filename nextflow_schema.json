@@ -308,6 +308,9 @@
             "type": "string",
             "default": "vizgen"
         },
+        "args_qccellfilter": {
+            "type": "string"
+        },
         "boundaries": {
             "type": "string"
         },

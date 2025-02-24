@@ -22,6 +22,7 @@ include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_eist
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_eista_pipeline'
 
 include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_eista_pipeline'
+include { MAKE_REPORT             } from './modules/local/make_report'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -56,6 +57,19 @@ workflow NFCORE_EISTA {
     EISTA (
         samplesheet
     )
+
+    ch_results = Channel.fromPath(params.outdir)
+    // if (params.analyses.contains('secondary') || params.analyses.contains('tertiary')){
+    if (!params.run_analyses.intersect(['secondary', 'tertiary', 'annotation', 'dea']).isEmpty()){    
+        // GET_PARAMS()
+        MAKE_REPORT (
+            ch_results,
+            Channel.fromPath(params.input),
+            EISCA.out.multiqc_report,
+            // EISCA.out.versions,
+            // GET_PARAMS.out.json,
+        )        
+    }    
 
     emit:
     multiqc_report = EISTA.out.multiqc_report // channel: /path/to/multiqc_report.html
