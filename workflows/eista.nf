@@ -16,6 +16,7 @@ include { VPT_PARTITION } from '../modules/local/vpt_partition'
 include { VPT_METADATA } from '../modules/local/vpt_metadata'
 include { VPT_SUM_SIGNALS } from '../modules/local/vpt_sum_signals'
 include { VPT_UPDATE_VZG } from '../modules/local/vpt_update_vzg'
+include { MTX_CONVERSION } from "../subworkflows/local/mtx_conversion"
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -30,6 +31,7 @@ workflow EISTA {
 
     main:
 
+    samplesheet = file(params.input)
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
 
@@ -95,6 +97,15 @@ workflow EISTA {
             }
 
         }
+
+        // Run mtx to h5ad conversion subworkflow
+        MTX_CONVERSION (
+            ch_samplesheet,
+            ch_counts,
+            ch_metadata,
+            samplesheet
+        )
+        ch_versions.mix(MTX_CONVERSION.out.ch_versions)
 
     }
 
