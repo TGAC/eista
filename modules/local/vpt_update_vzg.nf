@@ -28,14 +28,16 @@ process VPT_UPDATE_VZG {
 
 
     """
-    vpt \\
-        --processes ${task.cpus} update-vzg \\
-        --input-vzg ${vzg} \\
-        --input-boundaries ${parquet} \\
-        --input-entity-by-gene ${counts} \\
-        --input-metadata ${metadata} \\
-        --output-csv ${vzg_filename} \\
-        $args \\
+    if [ -f ${vzg} ]; then
+        vpt \\
+            --processes ${task.cpus} update-vzg \\
+            --input-vzg ${vzg} \\
+            --input-boundaries ${parquet} \\
+            --input-entity-by-gene ${counts} \\
+            --input-metadata ${metadata} \\
+            --output-csv ${vzg_filename} \\
+            $args \\
+    fi
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
