@@ -65,8 +65,8 @@ workflow NFCORE_EISTA {
         MAKE_REPORT (
             ch_results,
             Channel.fromPath(params.input),
-            EISCA.out.multiqc_report,
-            // EISCA.out.versions,
+            EISTA.out.multiqc_report,
+            // EISTA.out.versions,
             // GET_PARAMS.out.json,
         )        
     }    

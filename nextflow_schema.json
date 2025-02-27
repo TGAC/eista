@@ -327,11 +327,15 @@
         },
         "run_analyses": {
             "type": "array",
-            "default": "['primary', 'secondary', 'tertiary']"
+            "default": ["primary", "secondary", "tertiary"]
         },
         "skip_analyses": {
             "type": "array",
-            "default": "[]"
+            "default": []
+        },
+        "vzg_file": {
+            "type": "string",
+            "format": "file-path"
         }
     }
 }

@@ -8,7 +8,7 @@ process SPATIAL_TO_H5AD {
         'docker.io/villadsw/scanpy_squidpy:latest' }"
 
     input:
-    tuple val(meta), path(data)
+    // tuple val(meta), path(data)
     tuple val(meta), path(counts)
     tuple val(meta), path(metadata)
 
@@ -23,9 +23,11 @@ process SPATIAL_TO_H5AD {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def tech = params.technology
+    def datadir = "${params.outdir}/${params.technology}/${meta.id}"
+    def transformation 
     if (params.technology =='vizgen') {
-
-        def micron_to_mosaic = "${data}/images/micron_to_mosaic_pixel_transform.csv"
+        
+        transformation = "micron_to_mosaic_pixel_transform.csv"
 
     } else if (params.aligner == 'kallisto') {
 
@@ -36,11 +38,6 @@ process SPATIAL_TO_H5AD {
         barcodes_tsv = "${mtx_dir}/*.barcodes.txt"
         features_tsv = "${mtx_dir}/*.genes.names.txt"
 
-        // kallisto allows the following workflows: ["standard", "lamanno", "nac"]
-        // lamanno creates "spliced" and "unspliced"
-        // nac creates "nascent", "ambiguous" "mature"
-        // also, lamanno produces a barcodes and genes file for both spliced and unspliced
-        // while nac keep only one for all the different .mtx files produced
         kb_non_standard_files = ""
         if (params.kb_workflow == "lamanno") {
             kb_non_standard_files = "spliced unspliced"
@@ -52,10 +49,7 @@ process SPATIAL_TO_H5AD {
             kb_non_standard_files = "nascent ambiguous mature"
             matrix       = "${mtx_dir}/*\${input_type}.mtx"
             features_tsv = "${mtx_dir}/*.genes.txt"
-        } // barcodes tsv has same pattern as standard workflow
-        // if (params.protocol.contains('smartseq')) {
-        //     barcodes_tsv = "matrix.cells"
-        // }
+        }
 
     } else if (params.aligner == 'alevin') {
 
@@ -83,11 +77,18 @@ process SPATIAL_TO_H5AD {
     # convert file types
     spatial_to_h5ad.py \\
         --tech ${tech} \\
-        --datadir ${data} \\
+        --datadir ${datadir} \\
         --counts ${counts} \\
         --metadata ${metadata} \\
+        --transformation ${transformation} \\
         --outfile "${meta.id}_st_matrix.h5ad" \\
         $args \\
+
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: \$(python --version | sed 's/Python //g')
+    END_VERSIONS
     """
 
     else if (params.aligner == 'kallisto' && params.kb_workflow != 'standard')

@@ -3,7 +3,7 @@
 # Set numba chache dir to current working directory (which is a writable mount also in containers)
 import os
 os.environ["NUMBA_CACHE_DIR"] = "."
-# os.environ[ 'MPLCONFIGDIR' ] = '/tmp/'
+os.environ[ 'MPLCONFIGDIR' ] = '/tmp/'
 
 
 import scanpy as sc
@@ -54,12 +54,12 @@ def parse_args(argv=None):
         type=Path,
         help="The cell metadata file.",
     )
-    # parser.add_argument(
-    #     "--transformation",
-    #     metavar="TRANSFORMATION_FILE",
-    #     type=Path,
-    #     help="The micron_to_mosaic_pixel_transform file.",
-    # )          
+    parser.add_argument(
+        "--transformation",
+        metavar="TRANSFORMATION_FILE",
+        type=Path,
+        help="The micron_to_mosaic_pixel_transform file.",
+    )          
     return parser.parse_args(argv)
 
 
@@ -77,14 +77,14 @@ def main(argv=None):
             logger.error(f"The given input file {args.metadata} was not found!")
             sys.exit(2)
 
-        transformation = Path(args.datadir, "images/micron_to_mosaic_pixel_transform.csv")
+        # transformation = Path(args.datadir, "images/micron_to_mosaic_pixel_transform.csv")
 
 
         adata = sq.read.vizgen(
             path=args.datadir,
-            counts_file=args.counts,
-            meta_file=args.metadata,
-            transformation_file=transformation if transformation.is_file() else None,
+            counts_file=str(args.counts),
+            meta_file=str(args.metadata),
+            transformation_file=str(args.transformation) if args.transformation.is_file() else None,
         )
         
 

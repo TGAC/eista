@@ -17,6 +17,7 @@ include { VPT_METADATA } from '../modules/local/vpt_metadata'
 include { VPT_SUM_SIGNALS } from '../modules/local/vpt_sum_signals'
 include { VPT_UPDATE_VZG } from '../modules/local/vpt_update_vzg'
 include { MTX_CONVERSION } from "../subworkflows/local/mtx_conversion"
+include { QC_CELL_FILTER } from "../modules/local/qc_cell_filter"
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -85,9 +86,11 @@ workflow EISTA {
                 ch_signals = VPT_SUM_SIGNALS.out.signals
             }
 
+            ch_vzg = ch_samplesheet.map { meta, data -> data[0] }
+                    .flatMap { data -> file("${data}/*.vzg") }
             if (!params.skip_analyses.contains('update_vzg')) {
                 VPT_UPDATE_VZG (
-                    ch_samplesheet,
+                    ch_vzg,
                     ch_parquet,
                     ch_counts,
                     ch_metadata,

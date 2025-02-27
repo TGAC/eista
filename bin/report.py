@@ -187,8 +187,10 @@ def main(argv=None):
             html.p("""The following histogram plots display the distribution of cells based on the number of 
                    genes, total counts, and cell volumes.""")
             plots_from_image_files(path_cell_filtering, meta='sample', suffix=['histograms.png'])
-            html.p("""The following plots show the UMAP plots for the number of genes, total counts.""")                        
-            plots_from_image_files(path_cell_filtering, meta='sample', suffix=['umap_total*.png'])
+            # html.p("""The following plots show the UMAP plots for the number of genes, total counts.""")                        
+            # plots_from_image_files(path_cell_filtering, meta='sample', suffix=['umap_total*.png'])
+            html.p("""The following plots show the spatial scatter plots for the number of genes, total counts.""")                        
+            plots_from_image_files(path_cell_filtering, meta='sample', suffix=['spatial_scatter*.png'])
             # if util.check_file(f"{path_cell_filtering}/sample_*", 'umap_doublet.png'):
             #     html.p("""The following plots show the UMAP plots for the predicted doublets and doublet scores.""")                        
             #     plots_from_image_files(path_cell_filtering, meta='sample', suffix=['umap_doublet.png'])

@@ -18,7 +18,7 @@ workflow MTX_CONVERSION {
         // Convert matrix to h5ad
         //
         SPATIAL_TO_H5AD (
-            data,
+            // data,
             counts,
             metadata
         )
@@ -26,7 +26,7 @@ workflow MTX_CONVERSION {
         //
         // Concat sample-specific h5ad in one
         //
-        ch_concat_h5ad_input = MTX_TO_H5AD.out.h5ad.groupTuple() // gather all sample-specific files / per type
+        ch_concat_h5ad_input = SPATIAL_TO_H5AD.out.h5ad.collect() // gather all sample-specific files / per type
         CONCAT_H5AD (
             ch_concat_h5ad_input,
             samplesheet

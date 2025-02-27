@@ -11,7 +11,8 @@ process QC_CELL_FILTER {
     path samplesheet
 
     output:
-    path "*.h5ad",  emit: h5ad
+    path "qc_cell_filter"
+    path "qc_cell_filter/*.h5ad",  emit: h5ad
     path "versions.yml",  emit: versions
 
     when:
@@ -23,7 +24,7 @@ process QC_CELL_FILTER {
     qc_cell_filter.py \\
         --h5ad ${h5ad_raw} \\
         --samplesheet ${samplesheet} \\
-        --outdir "./" \\
+        --outdir qc_cell_filter \\
         $args \\
 
 

@@ -15,7 +15,7 @@ process MAKE_REPORT {
     // path "versions.txt"
     path results
     path samplesheet
-    path multiqc_report // just for executing in the end of pipeline
+    path multiqc_report // ensure executing in the end of pipeline
     // path "params.json"
 
     output:
@@ -33,7 +33,8 @@ process MAKE_REPORT {
 cat << EOF > versions.txt
 Python,3.9.18
 pandas,2.2.0
-scanpy,1.9.3 
+scanpy,1.9.8
+squidpy,1.6.1
 anndata,0.10.5.post1
 celltypist,1.6.3
 EOF

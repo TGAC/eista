@@ -6,11 +6,12 @@ os.environ["NUMBA_CACHE_DIR"] = "."
 os.environ[ 'MPLCONFIGDIR' ] = '/tmp/'
 
 import scanpy as sc
+import squidpy as sq
 import pandas as pd
 import numpy as np
 import seaborn as sns
-import scrublet as scr
-from scipy import stats
+# import scrublet as scr
+# from scipy import stats
 import anndata
 from matplotlib import pyplot as plt
 import argparse
@@ -194,7 +195,7 @@ def main(argv=None):
         # adata_s.var["hb"] = adata_s.var_names.str.contains("^HB[^(P)]")
 
         sc.pp.calculate_qc_metrics(
-            adata, percent_top=(50, 100, 200, 300), inplace=True, log1p=True
+            adata_s, percent_top=(50, 100, 200, 300), inplace=True, log1p=True
         )
 
         # create summary csv file for all samples
@@ -235,11 +236,11 @@ def main(argv=None):
         with plt.rc_context():
             fig, axs = plt.subplots(1, 3, figsize=(15, 4))
             axs[0].set_title("Total transcripts per cell")
-            sns.histplot(adata.obs["total_counts"], kde=False, ax=axs[0])
+            sns.histplot(adata_s.obs["total_counts"], kde=False, ax=axs[0])
             axs[1].set_title("Unique transcripts per cell")
-            sns.histplot(adata.obs["n_genes_by_counts"], kde=False, ax=axs[1])
+            sns.histplot(adata_s.obs["n_genes_by_counts"], kde=False, ax=axs[1])
             axs[2].set_title("Volume of segmented cells")
-            sns.histplot(adata.obs["volume"], kde=False, ax=axs[2])
+            sns.histplot(adata_s.obs["volume"], kde=False, ax=axs[2])
             plt.savefig(Path(path_sample, f'histograms.png'), bbox_inches="tight")
 
 
@@ -320,11 +321,11 @@ def main(argv=None):
         with plt.rc_context():
             fig, axs = plt.subplots(1, 3, figsize=(15, 4))
             axs[0].set_title("Total transcripts per cell")
-            sns.histplot(adata.obs["total_counts"], kde=False, ax=axs[0])
+            sns.histplot(adata_s.obs["total_counts"], kde=False, ax=axs[0])
             axs[1].set_title("Unique transcripts per cell")
-            sns.histplot(adata.obs["n_genes_by_counts"], kde=False, ax=axs[1])
+            sns.histplot(adata_s.obs["n_genes_by_counts"], kde=False, ax=axs[1])
             axs[2].set_title("Volume of segmented cells")
-            sns.histplot(adata.obs["volume"], kde=False, ax=axs[2])
+            sns.histplot(adata_s.obs["volume"], kde=False, ax=axs[2])
             plt.savefig(Path(path_sample, f'histograms.png'), bbox_inches="tight")
 
         adatas[sid] = adata_s
@@ -343,7 +344,7 @@ def main(argv=None):
     sc.pp.log1p(adata)
 
     # Feature selection and dimensionality reduction
-    sc.pp.highly_variable_genes(adata, n_top_genes=4000, batch_key="sample", flavor="seurat_v3")
+    sc.pp.highly_variable_genes(adata, n_top_genes=4000, batch_key="sample")
     with plt.rc_context():
         sc.pl.highly_variable_genes(adata, show=False)
         plt.savefig(Path(path_cell_filtering, 'highly_variable_genes.png'), bbox_inches="tight")
@@ -378,6 +379,14 @@ def main(argv=None):
             )
             plt.savefig(Path(path_cell_filtering_s, 'umap_total_counts_genes.png'), bbox_inches="tight")    
 
+        with plt.rc_context():
+            sq.pl.spatial_scatter(
+                adata_s, 
+                shape=None, 
+                color=["log1p_total_counts", "log1p_n_genes_by_counts"], 
+                wspace=0.4
+            )
+            plt.savefig(Path(path_cell_filtering_s, 'spatial_scatter_total_counts_genes.png'), bbox_inches="tight")
 
     # add group column in adata.obs
     # if hasattr(samplesheet, 'group'):

@@ -20,7 +20,8 @@ def read_samplesheet(samplesheet):
     # samplesheet may contain replicates, when it has,
     # group information from replicates and collapse with commas
     # only keep unique values using set()
-    df = df.groupby(["sample"]).agg(lambda column: ",".join(set(column)))
+    df = df.groupby("sample").agg(lambda column: ",".join(set(map(str, column.dropna()))))
+    # df = df.groupby(["sample"]).agg(lambda column: ",".join(set(column)))
 
     return df
 

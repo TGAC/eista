@@ -8,13 +8,13 @@ process VPT_UPDATE_VZG {
         'docker.io/vzgdocker/vpt:1.3' }"
 
     input:
-    tuple val(meta), path(data)
+    path vzg
     tuple val(meta), path(parquet)
     tuple val(meta), path(counts)
     tuple val(meta), path(metadata)
 
     output:
-    tuple val(meta), path($vzg_filename), emit: vzg
+    tuple val(meta), path("$vzg_filename"), emit: vzg
     path  "versions.yml", emit: versions
 
     when:
@@ -23,21 +23,24 @@ process VPT_UPDATE_VZG {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def vzg = "${data}/*.vzg"
-    def vzg_filename = 'update_' + new File(vzg).getName()
-
+    def vzg_update = "updated_${vzg.getName()}"
+    // def folder = new File("${data}")
+    // def vzgList = folder.listFiles().findAll{ it.name.endsWith('.vzg') }
+    // if (vzgList.isEmpty()) {
+    //     error "Error: No .vzg files found in '${data}'."
+    // }
+    // def vzg = vzgList[0].toString()
+    // def vzg_filename = "updated_${vzgList[0].getName()}"
 
     """
-    if [ -f ${vzg} ]; then
-        vpt \\
-            --processes ${task.cpus} update-vzg \\
-            --input-vzg ${vzg} \\
-            --input-boundaries ${parquet} \\
-            --input-entity-by-gene ${counts} \\
-            --input-metadata ${metadata} \\
-            --output-csv ${vzg_filename} \\
-            $args \\
-    fi
+    vpt \\
+        --processes ${task.cpus} update-vzg \\
+        --input-vzg ${vzg} \\
+        --input-boundaries ${parquet} \\
+        --input-entity-by-gene ${counts} \\
+        --input-metadata ${metadata} \\
+        --output-vzg ${vzg_update} \\
+        $args \\
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
