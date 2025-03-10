@@ -84,7 +84,7 @@ def parse_args(argv=None):
         "--min_gcounts",
         type=int,
         help="Filter genes by minimum counts expressed.",
-        default=1,
+        default=0,
     )
     parser.add_argument(
         "--max_volume",
@@ -173,7 +173,7 @@ def main(argv=None):
             logger.error(f"In the 'group' column, all samples must be assigned to a group.")
             sys.exit(1)
 
-    adata_raw = anndata.read_h5ad(args.h5ad)
+    adata_raw = sc.read_h5ad(args.h5ad)
     # adata_raw.obs['sample'] = [x.removesuffix('_raw') for x in adata_raw.obs['sample']]
 
     summary = []
@@ -206,7 +206,7 @@ def main(argv=None):
             'Number of cells': n_cells_raw,
             'Number of genes': n_genes_raw,
             'Median genes per cell': np.median(adata_s.obs['n_genes_by_counts']),
-            'Median of volume':  np.median(adata_s.obs['volume']),
+            'Median of volume': "{:.4f}".format(np.median(adata_s.obs['volume'])),
         }]
 
         # scatter plots on total_counts against n_genes_by_counts
@@ -247,8 +247,9 @@ def main(argv=None):
         # Cell filtering
         sc.pp.filter_cells(adata_s, min_genes=args.min_genes)
         sc.pp.filter_cells(adata_s, min_counts=args.min_counts)
-        sc.pp.filter_genes(adata_s, min_counts=args.min_gcounts)
         sc.pp.filter_genes(adata_s, min_cells=args.min_cells)
+        if args.min_gcounts > 0:
+            sc.pp.filter_genes(adata_s, min_counts=args.min_gcounts)
         if args.max_genes > 0:
             sc.pp.filter_cells(adata_s, max_genes=args.max_genes)
         if args.max_counts > 0:
@@ -297,7 +298,7 @@ def main(argv=None):
             'Number of cells': f"{n_cells} ({n_cells/n_cells_raw:.0%})",
             'Number of genes': f"{n_genes} ({n_genes/n_genes_raw:.0%})",
             'Median genes per cell': np.median(obs_s['n_genes_by_counts']),
-            'Median of volume':  np.median(obs_s['volume']),
+            'Median of volume': "{:.4f}".format(np.median(obs_s['volume'])),
         }]
 
 

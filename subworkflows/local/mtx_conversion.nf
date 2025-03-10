@@ -13,15 +13,17 @@ workflow MTX_CONVERSION {
 
     main:
         ch_versions = Channel.empty()
+        // ch_datadir = Channel.fromPath(params.outdir)
 
         //
         // Convert matrix to h5ad
         //
         SPATIAL_TO_H5AD (
-            // data,
+            Channel.fromPath(params.outdir),
+            data,
             counts,
             metadata
-        )
+        ) 
 
         //
         // Concat sample-specific h5ad in one

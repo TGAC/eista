@@ -8,12 +8,13 @@ process SPATIAL_TO_H5AD {
         'docker.io/villadsw/scanpy_squidpy:latest' }"
 
     input:
-    // tuple val(meta), path(data)
-    tuple val(meta), path(counts)
-    tuple val(meta), path(metadata)
+    path outdir
+    tuple val(meta), path(data), path(counts), path(metadata)
+    // tuple val(meta), path(counts)
+    // tuple val(meta), path(metadata)
 
     output:
-    path "*.h5ad",  emit: h5ad
+    tuple val("raw"), path("*.h5ad"),  emit: h5ad
     path  "versions.yml", emit: versions
 
     when:
@@ -23,11 +24,12 @@ process SPATIAL_TO_H5AD {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def tech = params.technology
-    def datadir = "${params.outdir}/${params.technology}/${meta.id}"
+    // def transformation = "${data}/images/micron_to_mosaic_pixel_transform.csv"
+    def datadir = "${outdir}/${params.technology}/${meta.id}"
     def transformation 
     if (params.technology =='vizgen') {
         
-        transformation = "micron_to_mosaic_pixel_transform.csv"
+        transformation = "${data}/images/micron_to_mosaic_pixel_transform.csv"
 
     } else if (params.aligner == 'kallisto') {
 
@@ -74,13 +76,14 @@ process SPATIAL_TO_H5AD {
     //
     if (params.technology =='vizgen')
     """
+    cp -n ${transformation} ${datadir}
     # convert file types
     spatial_to_h5ad.py \\
         --tech ${tech} \\
         --datadir ${datadir} \\
         --counts ${counts} \\
         --metadata ${metadata} \\
-        --transformation ${transformation} \\
+        --transformation micron_to_mosaic_pixel_transform.csv \\
         --outfile "${meta.id}_st_matrix.h5ad" \\
         $args \\
 

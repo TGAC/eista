@@ -1,6 +1,6 @@
 process VPT_UPDATE_VZG {
     tag "$meta.id"
-    label 'process_process_low'
+    label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -8,13 +8,14 @@ process VPT_UPDATE_VZG {
         'docker.io/vzgdocker/vpt:1.3' }"
 
     input:
-    path vzg
-    tuple val(meta), path(parquet)
-    tuple val(meta), path(counts)
-    tuple val(meta), path(metadata)
+    tuple val(meta), path(vzg), path(parquet), path(counts), path(metadata)
+    // path vzg
+    // tuple val(meta), path(parquet)
+    // tuple val(meta), path(counts)
+    // tuple val(meta), path(metadata)
 
     output:
-    tuple val(meta), path("$vzg_filename"), emit: vzg
+    path "updated_${vzg.getName()}", emit: vzg
     path  "versions.yml", emit: versions
 
     when:
@@ -33,8 +34,10 @@ process VPT_UPDATE_VZG {
     // def vzg_filename = "updated_${vzgList[0].getName()}"
 
     """
+    export HOME=$PWD
+    export CELLPOSE_LOCAL_MODELS_PATH=/ei/projects/0/05407428-a659-41d6-a7bd-4567bf45e494/data/vizgen/models
     vpt \\
-        --processes ${task.cpus} update-vzg \\
+        --verbose update-vzg \\
         --input-vzg ${vzg} \\
         --input-boundaries ${parquet} \\
         --input-entity-by-gene ${counts} \\

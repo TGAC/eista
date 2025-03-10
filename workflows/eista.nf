@@ -11,13 +11,17 @@ include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pi
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_eista_pipeline'
 
-include { VPT_SEGMENTATION } from '../modules/local/vpt_segmentation'
-include { VPT_PARTITION } from '../modules/local/vpt_partition'
-include { VPT_METADATA } from '../modules/local/vpt_metadata'
-include { VPT_SUM_SIGNALS } from '../modules/local/vpt_sum_signals'
-include { VPT_UPDATE_VZG } from '../modules/local/vpt_update_vzg'
-include { MTX_CONVERSION } from "../subworkflows/local/mtx_conversion"
+include { VPT_QUANTIFICATION } from '../modules/local/vpt_quantification'
+// include { VPT_SEGMENTATION } from '../modules/local/vpt_segmentation'
+// include { VPT_PARTITION } from '../modules/local/vpt_partition'
+// include { VPT_METADATA } from '../modules/local/vpt_metadata'
+// include { VPT_SUM_SIGNALS } from '../modules/local/vpt_sum_signals'
+// include { VPT_UPDATE_VZG } from '../modules/local/vpt_update_vzg'
+// include { MTX_CONVERSION } from "../subworkflows/local/mtx_conversion"
+include { SPATIAL_TO_H5AD } from '../modules/local/spatial_to_h5ad'
+include { CONCAT_H5AD } from '../modules/local/concat_h5ad'
 include { QC_CELL_FILTER } from "../modules/local/qc_cell_filter"
+include { CLUSTERING_ANALYSIS } from "../modules/local/clustering_analysis"
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -31,10 +35,11 @@ workflow EISTA {
     ch_samplesheet // channel: samplesheet read in from --input
 
     main:
-
     samplesheet = file(params.input)
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
+    ch_datacountsmeta = Channel.empty()
+    ch_concat_h5ad_input = Channel.empty()
 
     //
     // MODULE: Run FastQC
@@ -52,63 +57,44 @@ workflow EISTA {
     if (params.run_analyses.contains('primary')){
 
         if (params.technology == "vizgen") {
-            if (!params.skip_analyses.contains('segmentation_partition_metadata')) {
-                VPT_SEGMENTATION (
+            if (!params.skip_analyses.contains('quantification')) {
+
+                VPT_QUANTIFICATION (
                     ch_samplesheet,
-                    // Channel.fromPath(params.input)
-                    // MTX_CONVERSION.out.h5ad
+                    ch_samplesheet.map{ meta, data -> file("${data[0]}/*.vzg") }
                 )
-                ch_versions = ch_versions.mix(VPT_SEGMENTATION.out.versions)
-                ch_parquet = VPT_SEGMENTATION.out.parquet 
-
-                VPT_PARTITION (
-                    ch_samplesheet,
-                    ch_parquet,
-                )
-                ch_versions = ch_versions.mix(VPT_PARTITION.out.versions)
-                ch_counts = VPT_PARTITION.out.counts
-
-                VPT_METADATA (
-                    ch_parquet,
-                    ch_counts,
-                )
-                ch_versions = ch_versions.mix(VPT_METADATA.out.versions)
-                ch_metadata = VPT_METADATA.out.metadata
-
+                ch_versions = ch_versions.mix(VPT_QUANTIFICATION.out.versions)
+                ch_datacountsmeta = VPT_QUANTIFICATION.out.datacountsmeta
+                // ch_counts = VPT_QUANTIFICATION.out.counts
+                // ch_metadata = VPT_QUANTIFICATION.out.metadata
             }
-
-            if (!params.skip_analyses.contains('sum_signals')) {
-                VPT_SUM_SIGNALS (
-                    ch_samplesheet,
-                    ch_parquet,
-                )
-                ch_versions = ch_versions.mix(VPT_SUM_SIGNALS.out.versions)
-                ch_signals = VPT_SUM_SIGNALS.out.signals
-            }
-
-            ch_vzg = ch_samplesheet.map { meta, data -> data[0] }
-                    .flatMap { data -> file("${data}/*.vzg") }
-            if (!params.skip_analyses.contains('update_vzg')) {
-                VPT_UPDATE_VZG (
-                    ch_vzg,
-                    ch_parquet,
-                    ch_counts,
-                    ch_metadata,
-                )
-                ch_versions = ch_versions.mix(VPT_UPDATE_VZG.out.versions)
-                // ch_vzg = VPT_UPDATE_VZG.out.vzg
-            }
-
         }
 
         // Run mtx to h5ad conversion subworkflow
-        MTX_CONVERSION (
-            ch_samplesheet,
-            ch_counts,
-            ch_metadata,
+        // MTX_CONVERSION (
+        //     ch_samplesheet,
+        //     ch_counts,
+        //     ch_metadata,
+        //     samplesheet
+        // )
+        // ch_versions.mix(MTX_CONVERSION.out.ch_versions)
+
+        // ch_samplesheet
+        // .join(ch_counts, by: [0]).map{ meta, data, counts -> tuple(meta, data, counts) }
+        // .join(ch_metadata, by: [0]).map{ meta, data, counts, metadata -> tuple(meta, data, counts, metadata) }
+        // .set { ch_data_counts_meta }
+        SPATIAL_TO_H5AD (
+            Channel.value(file(params.outdir)),
+            ch_datacountsmeta
+        )
+        // ch_versions = ch_versions.mix(SPATIAL_TO_H5AD.out.versions)
+
+        ch_concat_h5ad_input = SPATIAL_TO_H5AD.out.h5ad.groupTuple()
+        CONCAT_H5AD (
+            ch_concat_h5ad_input,
             samplesheet
         )
-        ch_versions.mix(MTX_CONVERSION.out.ch_versions)
+        ch_versions = ch_versions.mix(CONCAT_H5AD.out.versions)  
 
     }
 
@@ -118,7 +104,7 @@ workflow EISTA {
         // MODULE: Run QC and cell filtering
         ch_h5ad = Channel.empty()
         if(params.run_analyses.contains('primary')){
-            ch_h5ad = MTX_CONVERSION.out.h5ad
+            ch_h5ad = CONCAT_H5AD.out.h5ad
         }else if(params.h5ad){
             ch_h5ad = Channel.fromPath(params.h5ad)
         }else if(params.aligner){
@@ -138,30 +124,20 @@ workflow EISTA {
             QC_CELL_FILTER (
                 ch_h5ad,
                 Channel.fromPath(params.input)
-                // MTX_CONVERSION.out.h5ad
             )
             // ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]})
             ch_versions = ch_versions.mix(QC_CELL_FILTER.out.versions)
             ch_h5ad = QC_CELL_FILTER.out.h5ad         
         }
         
-        // if (!params.skip_analyses.contains('clustering')) {
-        //     CLUSTERING_ANALYSIS (
-        //         ch_h5ad
-        //     )
-        //     ch_versions = ch_versions.mix(CLUSTERING_ANALYSIS.out.versions)
-        // }   
+        if (!params.skip_analyses.contains('clustering')) {
+            CLUSTERING_ANALYSIS (
+                ch_h5ad
+            )
+            ch_versions = ch_versions.mix(CLUSTERING_ANALYSIS.out.versions)
+        }   
         
     }
-
-
-
-
-
-
-
-
-
 
 
 
@@ -222,6 +198,7 @@ workflow EISTA {
     emit:
     multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
+
 }
 
 /*

@@ -8,8 +8,8 @@ process VPT_PARTITION {
         'docker.io/vzgdocker/vpt:1.3' }"
 
     input:
-    tuple val(meta), path(data)
-    tuple val(meta), path(parquet)
+    tuple val(meta), path(data), path(parquet)
+    // tuple val(meta), path(parquet)
 
     output:
     tuple val(meta), path("cell_by_gene.csv"), emit: counts
@@ -26,8 +26,10 @@ process VPT_PARTITION {
 
 
     """
+    export HOME=$PWD
+    export CELLPOSE_LOCAL_MODELS_PATH=/ei/projects/0/05407428-a659-41d6-a7bd-4567bf45e494/data/vizgen/models
     vpt \\
-        --processes ${task.cpus} partition-transcripts \\
+        --verbose partition-transcripts \\
         --input-boundaries ${parquet} \\
         --input-transcripts ${transcripts} \\
         --output-entity-by-gene cell_by_gene.csv \\

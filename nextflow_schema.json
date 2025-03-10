@@ -40,6 +40,11 @@
                     "type": "string",
                     "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
                     "fa_icon": "fas fa-file-signature"
+                },
+                "save_reference": {
+                    "type": "boolean",
+                    "description": "Specify this parameter to save the optional output files to the results.",
+                    "fa_icon": "fas fa-bookmark"
                 }
             }
         },
@@ -71,6 +76,82 @@
                     "fa_icon": "fas fa-ban",
                     "hidden": true,
                     "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
+                }
+            }
+        },
+        "analysis_options": {
+            "title": "Analysis Options",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "aligner": {
+                    "type": "string",
+                    "description": "Name of the tool to use for scRNA (pseudo-) alignment.",
+                    "default": "alevin",
+                    "help_text": "The workflow can handle three types of methods:\n\n- Kallisto/Bustools\n- Salmon + Alevin-fry + AlevinQC\n- STARsolo\n\nTo choose which one to use, please specify either `alevin`, `star` or `kallisto` as a parameter option for `--aligner`. By default, the pipeline runs the `alevin` option. Note that specifying another aligner option also requires choosing appropriate parameters (see below) for the selected option.",
+                    "fa_icon": "fas fa-align-center",
+                    "enum": ["kallisto", "star", "alevin"]
+                },
+                "technology": {
+                    "type": "string",
+                    "description": "The technology that was used to generate the spatial transcriptomics data",
+                    "help_text": "The default is to auto-detect the protocol when running cellranger. For all other aligners the protocol MUST be manually specified. \n\n The following protocols are recognized by the pipeline and mapped to the corresponding protocol name of the respective aligner: '10XV1', '10XV2', '10XV3', '10XV4'. \n\nAny other protocol value is passed to the aligner in verbatim to support other sequencing platforms. See the [kallisto](https://pachterlab.github.io/kallisto/manual#bus), [simpleaf](https://simpleaf.readthedocs.io/en/latest/quant-command.html#a-note-on-the-chemistry-flag), [starsolo](https://gensoft.pasteur.fr/docs/STAR/2.7.9a/STARsolo.html)",
+                    "default": "vizgen",
+                    "fa_icon": "fas fa-cogs"
+                },
+                "analyses": {
+                    "type": "string",
+                    "description": "Specify analysis phases in the pipeline. There are three analysis phases (see detailed explanation below): primary, secondary, and tertiary. Multiple phases can be applied and should be separated by commas. By default all analysis phases are applied and set as 'primary,secondary,tertiary'.",
+                    "default": "primary,secondary,tertiary"
+                },
+                "skip": {
+                    "type": "string",
+                    "description": "To skip one or multiple analyses, you can specify a set of analysis names separated by commas. e.g. '--skip fastqc'."
+                },
+                "args_qccellfilter": {
+                    "type": "string",
+                    "description": "Flagged argument settings for the process of Cell filtering and QC, e.g. '--min_genes 50 --min_cells 1'."
+                },
+                "args_clustering": {
+                    "type": "string",
+                    "description": "Flagged argument settings for the process of clustering analysis, e.g. '--regress --scale'."
+                },
+                "args_annotation ": {
+                    "type": "string",
+                    "description": "Flagged argument settings for the process of cell-type annotation analysis, e.g. '--model Immune_All_Low.pkl'."
+                }, 
+                "args_trainctmodel ": {
+                    "type": "string",
+                    "description": "Flagged argument settings for the process of training CellTypist models, e.g. '--feature_selection'."
+                },
+                "args_dea": {
+                    "type": "string",
+                    "description": "Flagged argument settings for the process of differential expression analysis, e.g. '--groupby leiden_res_0.50'."
+                },        
+                "run_analyses": {
+                    "type": "array",
+                    "description": "This is a internal parameter created from option --analyses",
+                    "default": ["primary", "secondary", "tertiary"]
+                },
+                "skip_analyses": {
+                    "type": "array",
+                    "description": "This is a internal parameter created from option --skip",
+                    "default": [""]
+                },
+                "h5ad": {
+                    "type": "string",
+                    "description": "An AnnData object used when your analysis starting point is secondary or tertiary. If not specified then the one generated by specified aligner will be used.",
+                    "fa_icon": "fas fa-file",
+                    "format": "file-path",
+                    "exists": true
+                },
+                "ctmodel": {
+                    "type": "string",
+                    "description": "CellTypist model file for cell-type annotation analysis",
+                    "fa_icon": "fas fa-file",
+                    "format": "file-path",
+                    "exists": true
                 }
             }
         },
@@ -294,23 +375,6 @@
         }
     ],
     "properties": {
-        "save_reference": {
-            "type": "boolean"
-        },
-        "analyses": {
-            "type": "string",
-            "default": "primary,secondary,tertiary"
-        },
-        "skip": {
-            "type": "string"
-        },
-        "technology": {
-            "type": "string",
-            "default": "vizgen"
-        },
-        "args_qccellfilter": {
-            "type": "string"
-        },
         "boundaries": {
             "type": "string"
         },
@@ -324,14 +388,6 @@
         "tile_overlap": {
             "type": "integer",
             "default": 200
-        },
-        "run_analyses": {
-            "type": "array",
-            "default": ["primary", "secondary", "tertiary"]
-        },
-        "skip_analyses": {
-            "type": "array",
-            "default": []
         },
         "vzg_file": {
             "type": "string",

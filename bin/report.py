@@ -210,7 +210,9 @@ def main(argv=None):
                    was performed using Leiden graph-clustering method. The resolution parameter 
                    was set for different values to get different number of clusters which 
                    could match to biologically-meaningful cell types.""")
-            plots_from_image_files(path_clustering, meta=batch, ncol=2)
+            plots_from_image_files(path_clustering, meta=batch, ncol=2, suffix=['umap*.png'])
+            html.p("""The following plots show the spatial scatter plots for the corresponding resolutions.""")                        
+            plots_from_image_files(path_clustering, meta=batch, ncol=2, suffix=['spatial_scatter*.png'])
             html.p(f"""The following plot shows a stacked bar chart that presents the proportions of clusters 
                    across {batch}s, calculated for each resolution value. The plot illustrates the distribution 
                    profiles of predicted clusters between {batch}s.""")                        

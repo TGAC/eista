@@ -1,4 +1,4 @@
-process CONCAT_H5AD {
+process CLUSTERING_ANALYSIS {
     label 'process_medium'
 
     conda "conda-forge::scanpy conda-forge::python-igraph conda-forge::leidenalg"
@@ -7,33 +7,36 @@ process CONCAT_H5AD {
         'docker.io/villadsw/scanpy_squidpy:latest' }"
 
     input:
-    tuple val(input_type), path(h5ad)
-    path samplesheet
+    path(h5ad_filtered)
+    // path samplesheet
 
     output:
-    path "*.h5ad", emit: h5ad
-    path  "versions.yml", emit: versions
+    path "clustering"
+    path "clustering/*.h5ad",  emit: h5ad
+    path "versions.yml",  emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
+    def args = task.ext.args ?: ''
     """
-    concat_h5ad.py \\
-        --input $samplesheet \\
-        --out combined_st_matrix.h5ad \\
-        --suffix "_st_matrix.h5ad"
-    
-    
+    clustering_analysis.py \\
+        --h5ad ${h5ad_filtered} \\
+        --outdir clustering \\
+        $args \\
+
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
-    END_VERSIONS
+    END_VERSIONS        
     """
-    // --suffix "_matrix.h5ad" : change to remove 'input_type' so that obs can map samplesheet
 
-    stub:
-    """
-    touch combined_matrix.h5ad
-    """
+
+
+    // stub:
+    // """
+    // touch combined_matrix.h5ad
+    // """
 }

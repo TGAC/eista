@@ -57,6 +57,9 @@ workflow NFCORE_EISTA {
     EISTA (
         samplesheet
     )
+    // EISTA_REST (
+    //     EISTA.out.h5ad_list
+    // )    
 
     ch_results = Channel.fromPath(params.outdir)
     // if (params.analyses.contains('secondary') || params.analyses.contains('tertiary')){
