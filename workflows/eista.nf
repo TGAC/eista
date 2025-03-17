@@ -22,6 +22,7 @@ include { SPATIAL_TO_H5AD } from '../modules/local/spatial_to_h5ad'
 include { CONCAT_H5AD } from '../modules/local/concat_h5ad'
 include { QC_CELL_FILTER } from "../modules/local/qc_cell_filter"
 include { CLUSTERING_ANALYSIS } from "../modules/local/clustering_analysis"
+include { SPATIAL_STATISTICS } from "../modules/local/spatial_statistics"
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -135,7 +136,15 @@ workflow EISTA {
                 ch_h5ad
             )
             ch_versions = ch_versions.mix(CLUSTERING_ANALYSIS.out.versions)
-        }   
+            ch_h5ad = CLUSTERING_ANALYSIS.out.h5ad
+        } 
+
+        if (!params.skip_analyses.contains('spatialstats')) {
+            SPATIAL_STATISTICS (
+                ch_h5ad
+            )
+            ch_versions = ch_versions.mix(SPATIAL_STATISTICS.out.versions)
+        }          
         
     }
 

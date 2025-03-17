@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import os
+os.environ[ 'MPLCONFIGDIR' ] = '/tmp/'
+
 import dominate.tags as html
 import ezcharts as ezc
 from ezcharts.components.reports.labs import LabsReport, LabsNavigation, ILabsNavigationClasses
@@ -140,6 +143,7 @@ def main(argv=None):
     path_cell_filtering = Path(path_quant_qc, 'cell_filtering')
     # path_cell_filtering_dist = Path(path_cell_filtering, 'distribution')
     path_clustering = Path(args.results, 'clustering')
+    path_spatialstats = Path(args.results, 'spatialstats')
     path_annotation = Path(args.results, 'annotation')
     path_dea = Path(args.results, 'dea')
 
@@ -204,7 +208,8 @@ def main(argv=None):
             batch = 'sample'
         elif util.check_file(f"{path_clustering}/group_*", ''):
             batch = 'group'
-        Nbatch = len(samplesheet[batch].unique())      
+        Nbatch = len(samplesheet[batch].unique())
+        if Nbatch == 1: Nbatch = 2
         with report.add_section('Clustering analysis', 'Clustering'):
             html.p(f"""This section shows clustering UMAP plots for each {batch}. The clustering 
                    was performed using Leiden graph-clustering method. The resolution parameter 
@@ -220,6 +225,64 @@ def main(argv=None):
             show_analysis_parameters(f"{path_clustering}/parameters.json")                   
     else:
         logger.info('Skipping clustering analysis')        
+
+
+    if path_spatialstats.exists():
+        if util.check_file(f"{path_spatialstats}/sample_*", ''):
+            batch = 'sample'
+        elif util.check_file(f"{path_spatialstats}/group_*", ''):
+            batch = 'group'
+        Nbatch = len(samplesheet[batch].unique())
+        # pd_autocorr = pd.read_csv(Path(path_spatialstats, 'autocorr_moranI.csv'))
+        with report.add_section('Spatial statistics analysis', 'Spatial-stats'):
+            html.p(f"""This section presents the spatial statistics analysis results for each {batch}. The statistics, 
+                   computed using the Squidpy package, include centrality scores, neighborhood enrichment scores, 
+                   and Moran’s I score. These statistics indicate the relationship between 
+                   expression patterns and biological morphology.""")
+            
+            html.p("""The following plots show the centrality analysis results of the 3 centrality scores include: 
+                   1) Closeness centrality, which indicates how close a group is to other nodes. 2) Degree centrality, 
+                   which represents the fraction of connected non-group members. 3) Clustering coefficient, which 
+                   measures the degree to which nodes form clusters. The three centrality scores are visualized in the 
+                   score plots. The spatial scatter plots highlight clusters with higher or lower values of these 
+                   centrality scores, which can be explained as follows: clusters with high closeness centrality are 
+                   close to other groups and tend to display a dispersed distribution throughout the tissue, while 
+                   clusters with low closeness centrality tend to display an uneven and isolated distribution; clusters 
+                   with high degree centrality scores have a high fraction of non-group member connections, while 
+                   clusters with low degree centrality scores have fewer non-group member connections and tend to be 
+                   lower-abundance clusters; a higher clustering coefficient indicates a stronger tendency for nodes 
+                   to cluster together, while a lower clustering coefficient suggests a more even distribution 
+                   throughout the tissue.""")                        
+            plots_from_image_files(path_spatialstats, meta=batch, ncol=1, suffix=['centrality_scores*.png'])            
+            plots_from_image_files(path_spatialstats, meta=batch, ncol=2, suffix=['spatial_scatter_closeness*.png'])            
+            plots_from_image_files(path_spatialstats, meta=batch, ncol=2, suffix=['spatial_scatter_degree*.png'])            
+            plots_from_image_files(path_spatialstats, meta=batch, ncol=2, suffix=['spatial_scatter_clustering*.png'])            
+
+            html.p("""The following heatmap shows the results of the neighborhood enrichment analysis on clusters. This 
+                   analysis indicates whether certain cell types or gene expression patterns are spatially enriched in 
+                   neighboring regions of a tissue. It helps identify spatial dependencies between cells or tissue regions. 
+                   From the heatmap, we can observe the strength of spatial co-localization between clusters/cell types 
+                   in a tissue. A strong positive score indicates that they are frequently neighbors, while a strong 
+                   negative score indicates that they avoid each other.""")                    
+            plots_from_image_files(path_spatialstats, meta=batch, suffix=['neighbors_enrichment*.png'], widths=['700'])
+
+            html.p("""The following table shows Moran’s I statistics for autocorrelation analysis of the top 50 and bottom 
+                   50 genes. Here, 'I' represents Moran's score, 'pval_norm' is the p-value under the normality assumption, 
+                   and 'var_norm' is the variance of the score under the normality assumption. Moran’s I global spatial 
+                   autocorrelation statistic evaluates whether features (i.e., genes) exhibit spatial clustering (local 
+                   patterns) or a random distribution across a spatial field. Genes with high spatial autocorrelation follow 
+                   a clustered spatial pattern, while genes with low spatial autocorrelation display a more evenly 
+                   distributed expression pattern.""")
+            show_tab_table(path_spatialstats, meta=batch, suffix='autocorr_moranI.csv')
+            # DataTable.from_pandas(pd_autocorr)
+            html.p(f"""The following plots show the spatial scatter plots for top 6 genes among the highest Moran's I scores.""")                        
+            plots_from_image_files(path_spatialstats, meta=batch, ncol=3, suffix=['spatial_scatter_top*.png'])
+            html.p(f"""The following plots show the spatial scatter plots for bottom 6 genes among the lowest Moran's I scores.""")                        
+            plots_from_image_files(path_spatialstats, meta=batch, ncol=3, suffix=['spatial_scatter_bot*.png'])
+
+            show_analysis_parameters(f"{path_spatialstats}/parameters.json")                   
+    else:
+        logger.info('Skipping clustering analysis') 
 
 
     if path_annotation.exists():

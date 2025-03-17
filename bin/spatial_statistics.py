@@ -142,7 +142,7 @@ def main(argv=None):
 
             # Compute centrality scores
             sq.gr.centrality_scores(adata_s, cluster_key=cluster_key)
-            df_central = deepcopy(adata_s.uns["leiden_centrality_scores"])
+            df_central = deepcopy(adata_s.uns[f"{cluster_key}_centrality_scores"])
             df_central.index = meta_leiden.index.tolist()
             ser_closeness = df_central["closeness_centrality"].sort_values(ascending=False)
             ser_degree = df_central["degree_centrality"].sort_values(ascending=False)
@@ -160,54 +160,60 @@ def main(argv=None):
                     groups=ser_closeness.index.tolist()[:min(5, ser_closeness.size//2)], 
                     shape=None, 
                     color=cluster_key,
-                    wspace=0.4
+                    wspace=0.4,
+                    title=f"High closeness - {cluster_key}",
                 )
-                plt.savefig(Path(path_statistics_s, f"spatial_scatter_high_closeness_{cluster_key}.png"), bbox_inches="tight")
+                plt.savefig(Path(path_statistics_s, f"spatial_scatter_closeness_high_{cluster_key}.png"), bbox_inches="tight")
             with plt.rc_context():
                 sq.pl.spatial_scatter(
                     adata_s, 
                     groups=ser_closeness.index.tolist()[max(-5, -ser_closeness.size//2):], 
                     shape=None, 
                     color=cluster_key,
-                    wspace=0.4
+                    wspace=0.4,
+                    title=f"Low closeness - {cluster_key}",
                 )
-                plt.savefig(Path(path_statistics_s, f"spatial_scatter_low_closeness_{cluster_key}.png"), bbox_inches="tight")
+                plt.savefig(Path(path_statistics_s, f"spatial_scatter_closeness_low_{cluster_key}.png"), bbox_inches="tight")
             with plt.rc_context():
                 sq.pl.spatial_scatter(
                     adata_s, 
                     groups=ser_degree.index.tolist()[:min(5, ser_degree.size//2)], 
                     shape=None, 
                     color=cluster_key,
-                    wspace=0.4
+                    wspace=0.4,
+                    title=f"High degree - {cluster_key}",
                 )
-                plt.savefig(Path(path_statistics_s, f"spatial_scatter_high_degree_{cluster_key}.png"), bbox_inches="tight")
+                plt.savefig(Path(path_statistics_s, f"spatial_scatter_degree_high_{cluster_key}.png"), bbox_inches="tight")
             with plt.rc_context():
                 sq.pl.spatial_scatter(
                     adata_s, 
                     groups=ser_degree.index.tolist()[max(-5, -ser_degree.size//2):], 
                     shape=None, 
                     color=cluster_key,
-                    wspace=0.4
+                    wspace=0.4,
+                    title=f"Low degree - {cluster_key}",
                 )
-                plt.savefig(Path(path_statistics_s, f"spatial_scatter_low_degree_{cluster_key}.png"), bbox_inches="tight")
+                plt.savefig(Path(path_statistics_s, f"spatial_scatter_degree_low_{cluster_key}.png"), bbox_inches="tight")
             with plt.rc_context():
                 sq.pl.spatial_scatter(
                     adata_s, 
                     groups=ser_cluster.index.tolist()[:min(5, ser_cluster.size//2)], 
                     shape=None, 
                     color=cluster_key,
-                    wspace=0.4
+                    wspace=0.4,
+                    title=f"High clustering coefficient - {cluster_key}",
                 )
-                plt.savefig(Path(path_statistics_s, f"spatial_scatter_high_cluster_{cluster_key}.png"), bbox_inches="tight")
+                plt.savefig(Path(path_statistics_s, f"spatial_scatter_clustering_high_{cluster_key}.png"), bbox_inches="tight")
             with plt.rc_context():
                 sq.pl.spatial_scatter(
                     adata_s, 
                     groups=ser_cluster.index.tolist()[max(-5, -ser_cluster.size//2):], 
                     shape=None, 
                     color=cluster_key,
-                    wspace=0.4
+                    wspace=0.4,
+                    title=f"Low clustering coefficient - {cluster_key}",
                 )
-                plt.savefig(Path(path_statistics_s, f"spatial_scatter_low_cluster_{cluster_key}.png"), bbox_inches="tight")
+                plt.savefig(Path(path_statistics_s, f"spatial_scatter_clustering_low_{cluster_key}.png"), bbox_inches="tight")
 
             # Neighbors enrichment analysis
             sq.gr.nhood_enrichment(adata_s, cluster_key=cluster_key, show_progress_bar=False)
@@ -216,27 +222,27 @@ def main(argv=None):
                     adata_s,
                     cluster_key=cluster_key,
                     figsize=(8, 8),
-                    title="Neighborhood enrichment adata",
+                    title="Neighborhood enrichment heatmap",
                 )
-                plt.savefig(Path(path_statistics_s, f"Neighbors_enrichment_{cluster_key}.png"), bbox_inches="tight")
+                plt.savefig(Path(path_statistics_s, f"neighbors_enrichment_{cluster_key}.png"), bbox_inches="tight")
     
             # Ripley’s statistics
-            sq.gr.ripley(adata_s, cluster_key=cluster_key, mode='L')
-            with plt.rc_context():
-                sq.pl.ripley(
-                    adata_s, 
-                    cluster_key="leiden", 
-                    mode='L',
-                )
-                plt.savefig(Path(path_statistics_s, f"Ripley_L_{cluster_key}.png"), bbox_inches="tight")
-            sq.gr.ripley(adata_s, cluster_key=cluster_key, mode='F')
-            with plt.rc_context():
-                sq.pl.ripley(
-                    adata_s, 
-                    cluster_key="leiden", 
-                    mode='F',
-                )
-                plt.savefig(Path(path_statistics_s, f"Ripley_F_{cluster_key}.png"), bbox_inches="tight")
+            # sq.gr.ripley(adata_s, cluster_key=cluster_key, mode='L')
+            # with plt.rc_context():
+            #     sq.pl.ripley(
+            #         adata_s, 
+            #         cluster_key="leiden", 
+            #         mode='L',
+            #     )
+            #     plt.savefig(Path(path_statistics_s, f"Ripley_L_{cluster_key}.png"), bbox_inches="tight")
+            # sq.gr.ripley(adata_s, cluster_key=cluster_key, mode='F')
+            # with plt.rc_context():
+            #     sq.pl.ripley(
+            #         adata_s, 
+            #         cluster_key="leiden", 
+            #         mode='F',
+            #     )
+            #     plt.savefig(Path(path_statistics_s, f"Ripley_F_{cluster_key}.png"), bbox_inches="tight")
 
         # Moran’s I score
         adata_subsample = adata_s
@@ -250,8 +256,11 @@ def main(argv=None):
             n_jobs=args.autocorr_n_jobs,
         )
         # amode = {'moran': 'moranI', 'geary': 'gearyC'}.get(args.autocorr_mode)
-        adata_subsample.uns['moran'].head(100).to_csv(Path(path_statistics_s, 'autocorr_moranI.csv'), index=False)
-        for gene in adata_subsample.uns['moran'].head(6).index.tolist():
+        pd.concat([adata_subsample.uns['moranI'].head(50), adata_subsample.uns['moranI'].tail(50)]) \
+            .reset_index().rename(columns={'index': 'Gene'}) \
+            .to_csv(Path(path_statistics_s, 'autocorr_moranI.csv'), index=False)
+        # adata_subsample.uns['moran'].head(100).to_csv(Path(path_statistics_s, 'autocorr_moranI.csv'), index=False)
+        for gene in adata_subsample.uns['moranI'].head(6).index.tolist():
             with plt.rc_context():
                 sq.pl.spatial_scatter(
                     adata_subsample,
@@ -260,7 +269,17 @@ def main(argv=None):
                     size=2,
                     img=False,
                 )
-                plt.savefig(Path(path_statistics_s, f"spatial_scatter_{gene}.png"), bbox_inches="tight")
+                plt.savefig(Path(path_statistics_s, f"spatial_scatter_top_{gene}.png"), bbox_inches="tight")
+        for gene in adata_subsample.uns['moranI'].tail(6).index.tolist():
+            with plt.rc_context():
+                sq.pl.spatial_scatter(
+                    adata_subsample,
+                    color=[gene],
+                    shape=None,
+                    size=2,
+                    img=False,
+                )
+                plt.savefig(Path(path_statistics_s, f"spatial_scatter_bot_{gene}.png"), bbox_inches="tight")
 
 
 
@@ -270,7 +289,7 @@ def main(argv=None):
         params.update({"--h5ad": str(args.h5ad)})        
         params.update({"--coord_type": str(args.coord_type)})        
         if args.cluster_keys: params.update({"--cluster_keys": args.cluster_keys})        
-        if args.integrate: params.update({"--integrate": args.integrate})        
+        # if args.integrate: params.update({"--integrate": args.integrate})        
         params.update({"--autocorr_n_perms": args.autocorr_n_perms})        
         params.update({"--autocorr_n_jobs": args.autocorr_n_jobs})        
         params.update({"--subsample_frac": args.subsample_frac})        

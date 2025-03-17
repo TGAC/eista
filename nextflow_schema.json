@@ -117,6 +117,10 @@
                     "type": "string",
                     "description": "Flagged argument settings for the process of clustering analysis, e.g. '--regress --scale'."
                 },
+                "args_spatialstats": {
+                    "type": "string",
+                    "description": "Flagged argument settings for the process of spatial statistics analysis."
+                },
                 "args_annotation ": {
                     "type": "string",
                     "description": "Flagged argument settings for the process of cell-type annotation analysis, e.g. '--model Immune_All_Low.pkl'."

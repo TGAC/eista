@@ -11,6 +11,7 @@ from ezcharts.components.reports.labs import ILabsAddendumClasses
 from pathlib import Path
 import json
 from PIL import Image
+import pandas as pd
 
 
 
@@ -146,6 +147,18 @@ def plots_from_image_files(path, meta=None, ncol=1, suffix=['*.png'], widths=Non
                         with figure(cls='text-center'):
                             img(src=f'data:image/png;base64,{b64img}', width=width)
                             # a(img(src=f'data:image/png;base64,{b64img}', width=width), href=f'{img_path}')        
+
+
+def show_tab_table(path, meta='sample', suffix='*.csv'):
+    """Show the muiltiple tabls of tables"""
+    tabs = Tabs()
+    for folder in sorted([f for f in path.iterdir() if f.is_dir()]):
+        if folder.name.startswith(f'{meta}_'):
+            sample_id = folder.name.split('_', 1)[1]
+            # pathes = sorted([file for sf in suffix for file in folder.glob(sf) if file.is_file()])
+            pd_table = pd.read_csv(Path(folder, suffix))
+            with tabs.add_tab(sample_id):
+                DataTable.from_pandas(pd_table)
 
 
 class EILogo(div):
