@@ -12,34 +12,98 @@ The directories listed below will be created in the results directory after the 
 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
 
-- [FastQC](#fastqc) - Raw read QC
-- [MultiQC](#multiqc) - Aggregate report describing results and QC from the whole pipeline
-- [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
+- [Primary analysis](#primary-analysis)
+  - [Vizgen post-processing analysis](#vizgen-post-processing-analysis) - Cell segmentation and partition
+- [Secondary analysis](#secondary-analysis)
+  - [QC & cell filtering](#qc--cell-filtering) - Cell filtering and QC on raw data and filtered data
+  - [Clustering analysis](#clustering-analysis) - Single-cell clustering analysis
+  - [Spatial statistics analysis](#spatial-statistics-analysis) - Single-cell spatial statistics analysis
+- [Pipeline reporting](#pipeline-reporting)
+  - [Analysis report](#analysis-report) - Single-ell Analysis Report
+  - [MultiQC](#multiqc) - Aggregate report describing results and QC for tools registered in nf-core
+  - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
 
-### FastQC
 
-<details markdown="1">
-<summary>Output files</summary>
+## Primary analysis
 
-- `fastqc/`
-  - `*_fastqc.html`: FastQC report containing quality metrics.
-  - `*_fastqc.zip`: Zip archive containing the FastQC report, tab-delimited data file and plot images.
+### <u>Vizgen post-processing analysis</u>
 
-</details>
+**Output directory: `results/vizgen`**
+- `<sample_name>/`: Contains output files from Vizgen post-processing too VPT.
+  - `counts_unfiltered/`
+    - `cell_by_gene.csv`: The raw count of transcripts of each targeted gene in each cell.
+    - `cellpose_micron_space.parquet`: The primary output of the segmentation. This table contains the EntityIDs for the cells and the geometries in units of microns.
+    - `detected_transcripts.csv`: This file has the information about the detected genes and their locations.
+    - `cell_metadata.csv`: The cell metadata file has annotation about the location, size, and shape of each cell that can be used to identify cell neighbors, sort cells into cell types, filter low quality cells, etc.
+    - `sum_signals.csv`: The sum signals file has information about the brightness of each mosaic tiff image within each cell.
+    - `updated_*.vzg`: An updated vzg file with new entity geometries and a new Cell-by-Entity matrix. The file is used for visualization in the MERSCOPE Desktop Vizualizer software.
+- `mtx_conversions/`
+  - `<sample_name>/`
+    - `sample_name_st_matrix.h5ad`: AnnData object file for this sample.
+  - `combined_st_matrix.h5ad`: AnnData object file for combined samples.
 
-[FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your sequenced reads. It provides information about the quality score distribution across your reads, per base sequence content (%A/T/G/C), adapter contamination and overrepresented sequences. For further reading and documentation see the [FastQC help pages](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
 
-![MultiQC - FastQC sequence counts plot](images/mqc_fastqc_counts.png)
+## Secondary analysis
 
-![MultiQC - FastQC mean quality scores plot](images/mqc_fastqc_quality.png)
+### <u>QC & cell filtering</u>
 
-![MultiQC - FastQC adapter content plot](images/mqc_fastqc_adapter.png)
+**Output directory: `results/qc_cell_filter`**
+- `sample_summary.csv`: overall summary of the single-cell count matrix
+- `adata_filtered_normalized.h5ad`: AnnData object file after cell filtering and normalization
+- `raw_counts/sample_*/`
+  - `scatter_counts_genes_volume.png`: scatter plot shows the relationship between total read counts and the number of genes.
+  - `violin*.png`: violin plots display the distribution of cells based on the number of genes, total counts, and cell volumes.
+  - `histograms.png`: histogram plots display the distribution of cells based on the number of genes, total counts, and cell volumes. 
+- `cell_filtering/`
+  - `highly_variable_genes.png`: plot of mean expressions against dispersions of genes for highly variable genes.
+  - `sample_summary_filtered.csv`: overall summary of the single-cell count matrix after cell filtering
+  - `sample_*/`
+    - `spatial_scatter_total_counts_genes.png`: spatial scatter plots for the number of genes, total counts.
+    - `umap_total_counts_genes.png`: UMAP plots for the number of genes, total counts.
+    - `violin*.png`: violin plots display the distribution of cells based on the number of genes, total counts, and cell volumes.
+    - `histograms.png`: histogram plots display the distribution of cells based on the number of genes, total counts, and cell volumes.
+- `parameters.json`: a JSON file containing the parameter settings in the analysis.
+    
 
-:::note
-The FastQC plots displayed in the MultiQC report shows _untrimmed_ reads. They may contain adapter sequence and potentially regions with low quality.
-:::
+### <u>Clustering analysis</u>
 
-### MultiQC
+**Output directory: `results/clustering`**
+- `adata_clustering.h5ad`: AnnData object file after clustering analysis.
+- `sample_*/` or `group_*/`
+  - `umap_leiden_res_*.png`: UMAP plots showing clustering results with differnt resoultuion settings.
+  - `spatial_scatter_leiden_res_*.png`: spatial scatter plots for the corresponding resolutions of clustering.
+- `resolution_*/`
+  - `prop_leiden_res_*.png`: plot showing a stacked bar chart that presents the proportions of clusters across samples/groups.
+- `parameters.json`: a JSON file containing the parameter settings in the analysis.
+
+
+### <u>Spatial statistics analysis</u>
+
+**Output directory: `results/spatialstats`**
+- `sample_*/` or `group_*/`
+  - `centrality_scores_leiden_res_*.png`: a plot showing 3 centrality scores include: Closeness centrality, Degree centrality, and Clustering coefficient.
+  - `spatial_scatter_closeness_high_*.png`: spatial scatter plots highlight clusters/groups with high closeness centrality
+  - `spatial_scatter_closeness_low_*.png`: spatial scatter plots highlight clusters/groups with low closeness centrality
+  - `spatial_scatter_degree_high_*.png`: spatial scatter plots highlight clusters/groups with high degree centrality
+  - `spatial_scatter_degree_low_*.png`: spatial scatter plots highlight clusters/groups with low degree centrality
+  - `spatial_scatter_clustering_high_*.png`: spatial scatter plots highlight clusters/groups with high clustering coefficient
+  - `spatial_scatter_clustering_low_*.png`: spatial scatter plots highlight clusters/groups with low clustering coefficient
+  - `neighbors_enrichment_leiden_res_*.png`: the heatmap shows the results of the neighborhood enrichment analysis on clusters. 
+  - `autocorr_moranI.csv`: a csv file shows Moran’s I statistics for autocorrelation analysis of the top 50 and bottom 50 genes.
+  - `spatial_scatter_top_*.png`: spatial scatter plots showing top 6 genes among the highest Moran's I scores.
+  - `spatial_scatter_bot_*.png`: spatial scatter plots showing top 6 genes among the lowest Moran's I scores.
+- `parameters.json`: a JSON file containing the parameter settings in the analysis.
+
+
+## Pipeline reporting
+
+### <u>Analysis report</u>
+
+**Output directory: `results/report`**
+- `eisca_report.html`: this is HTML report file showing all major analysis results.
+
+
+### <u>MultiQC</u>
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -55,7 +119,7 @@ The FastQC plots displayed in the MultiQC report shows _untrimmed_ reads. They m
 
 Results generated by MultiQC collate pipeline QC from supported tools e.g. FastQC. The pipeline has special steps which also allow the software versions to be reported in the MultiQC output for future traceability. For more information about how to use MultiQC reports, see <http://multiqc.info>.
 
-### Pipeline information
+### <u>Pipeline information</u>
 
 <details markdown="1">
 <summary>Output files</summary>

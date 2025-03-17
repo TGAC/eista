@@ -95,7 +95,7 @@ def parse_args(argv=None):
     parser.add_argument(
         "--min_volume",
         type=int,
-        help="Filter genes by minimum volume.",
+        help="Filter cells by minimum volume.",
         default=0,
     )
     parser.add_argument(

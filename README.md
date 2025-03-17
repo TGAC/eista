@@ -19,7 +19,28 @@
 
 ## Introduction
 
-**nf-core/eista** is a bioinformatics pipeline that ...
+**nf-core/eista** is a bioinformatics pipeline that perform analysis for single-cell spatial transcriptomics data (Vizgen data). The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes (implemented and to be implemented) are as follows:
+
+- **Primary analysis**
+  - Cell segmentation - defines cell boundaries from images 
+  - partition transcripts - determine which cell contains each detected transcript
+  - calculate cell metadata - calculate the geometric attributes of each cell
+  - sum signals - find the intensity of each mosaic image in each cell
+  - update vzg - Updates an existing .vzg file with new segmentation boundaries and expression matrix
+- **Secondary analysis**
+  - QC & cell filtering - cell filtering and QC on raw data and filtered data
+  - Clustering analysis - single-cell clustering analysis
+  - Merging/integration of samples 
+  - Spatial statistics analysis - Neighbor enrichment analysis, calculating centrality scores and Moran's I score
+- **Tertiary analysis**
+  - Cell type annotation (to be implemented)
+  - Differential expression analysis (to be implemented)
+  - Other downstream analyses (to be implemented)
+- **Pipeline reporting**
+  - Analysis report - Single-ell Analysis Report.
+  - MultiQC - Aggregate report describing results and QC for tools registered in nf-core
+  - Pipeline information - Report metrics generated during the workflow execution
+
 
 <!-- TODO nf-core:
    Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
