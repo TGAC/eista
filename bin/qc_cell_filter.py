@@ -116,6 +116,12 @@ def parse_args(argv=None):
         help="Remove outliers which larger than iqr_coef*IQR in total_counts.",
         default=2,
     )
+    parser.add_argument(
+        "--fontsize",
+        type=int,
+        help="Set font size for plots.",
+        default=12,
+    )
     # parser.add_argument(
     #     "--pct_mt",
     #     type=int,
@@ -151,6 +157,15 @@ def main(argv=None):
     if not args.samplesheet.is_file():
         logger.error(f"The given input file {args.samplesheet} was not found!")
         sys.exit(2)        
+
+    plt.rcParams.update({
+        "font.size": args.fontsize,
+        # "axes.titlesize": 'medium',
+        # "axes.labelsize": 'small',
+        # "xtick.labelsize": 'small',
+        # "ytick.labelsize": 'small',
+        # "legend.fontsize": 'small',
+    })
 
     util.check_and_create_folder(args.outdir)
     # path_quant_qc = Path(args.outdir, 'quant_qc')
@@ -235,6 +250,7 @@ def main(argv=None):
         # histograms of distributions
         with plt.rc_context():
             fig, axs = plt.subplots(1, 3, figsize=(15, 4))
+            fig.subplots_adjust(wspace=0.3)
             axs[0].set_title("Total transcripts per cell")
             sns.histplot(adata_s.obs["total_counts"], kde=False, ax=axs[0])
             axs[1].set_title("Unique transcripts per cell")
@@ -321,6 +337,7 @@ def main(argv=None):
         # histograms of distributions
         with plt.rc_context():
             fig, axs = plt.subplots(1, 3, figsize=(15, 4))
+            fig.subplots_adjust(wspace=0.3)
             axs[0].set_title("Total transcripts per cell")
             sns.histplot(adata_s.obs["total_counts"], kde=False, ax=axs[0])
             axs[1].set_title("Unique transcripts per cell")

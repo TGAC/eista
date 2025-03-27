@@ -40,7 +40,7 @@ sampe_2,vizgen_data_sample_2,,CONTROL
 sampe_3,vizgen_data_sample_3,,CONTROL
 sampe_4,vizgen_data_sample_4,,TREATMENT
 sampe_5,vizgen_data_sample_5,,TREATMENT
-sampe_6,vizgen_data_sample_6,TREATMENT
+sampe_6,vizgen_data_sample_6,sample_x,TREATMENT
 sampe_7,vizgen_data_sample_7,sample_x,TREATMENT
 ```
 
@@ -120,6 +120,7 @@ Users can set the options for cell filtering in the parameter `--args_qccellfilt
 | --quantile_upper  \<float> | Filter genes by upper limit of quantile on number of genes. (default=1) |
 | --quantile_lower  \<float> | Filter genes by lower limit of quantile on number of genes. (default=0) |
 | --iqr_coef  \<int> | Remove outliers which larger than iqr_coef*IQR in total_counts. (default=2) |
+| --fontsize  \<int> | Specify the font size for plots. (default=12) |
 
 For example, `--args_qccellfilter "--min_genes 50 --max_volume 3000"`
 
@@ -135,6 +136,7 @@ Users can set the options for clustering analysis in the parameter `args_cluster
 | --resolutions \<string> | Resolution is used to control number of clusters; you can set a set of resolutions deliminated by ','. (default="0.02,0.05,0.1,0.5")|
 | --integrate \<[bbknn, harmony]> | Choose a method for data integration across samples. Currently two integration algorighms can be choosen: 'bbknn' - a fast and intuitive batch effect removal method focus on local structure; 'harmony' - a popular global correction approach that iteratively adjusts the embedding of cells in lower-dimensional space, which is effective at correcting large batch effects, especially in datasets with complex batch structures. (default=None)|
 | --meta  \<[auto, sample, group]> | Choose a metadata column as the batch classes on which the clustering UMAPs will be displayed. By default, it is set to 'auto', which means it will use the 'group' column as the batch classes if 'group' is defined in the samplesheet file; otherwise, it will use the 'sample' column. |
+| --fontsize  \<int> | Specify the font size for plots. (default=12) |
 
 For example, `--args_clustering "--resolutions 0.1,0.2,0.3,0.5"`
 
@@ -149,6 +151,7 @@ Users can set the options for spatial statistics analysis in the parameter `--ar
 | --autocorr_n_jobs  \<int> | Number of parallel jobs for autocorrelation analysis. (default=5) |
 | --subsample_frac  \<float> | Subsample to this fraction of the number of cells. (default=1)  |
 | --meta  \<[auto, sample, group]> | Choose a metadata column as the batch classes on which the clustering UMAPs will be displayed. By default, it is set to 'auto', which means it will use the 'group' column as the batch classes if 'group' is defined in the samplesheet file; otherwise, it will use the 'sample' column. |
+| --fontsize  \<int> | Specify the font size for plots. (default=12) |
 
 For example, `--args_spatialstats "--cluster_keys leiden_res_0.50"`
 

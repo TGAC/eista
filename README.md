@@ -23,10 +23,10 @@
 
 - **Primary analysis**
   - Cell segmentation - defines cell boundaries from images 
-  - partition transcripts - determine which cell contains each detected transcript
-  - calculate cell metadata - calculate the geometric attributes of each cell
-  - sum signals - find the intensity of each mosaic image in each cell
-  - update vzg - Updates an existing .vzg file with new segmentation boundaries and expression matrix
+  - Partition transcripts - determine which cell contains each detected transcript
+  - Calculate cell metadata - calculate the geometric attributes of each cell
+  - Sum signals - find the intensity of each mosaic image in each cell
+  - Update vzg - Updates an existing .vzg file with new segmentation boundaries and expression matrix
 - **Secondary analysis**
   - QC & cell filtering - cell filtering and QC on raw data and filtered data
   - Clustering analysis - single-cell clustering analysis

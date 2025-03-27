@@ -19,7 +19,8 @@ process VPT_QUANTIFICATION {
     tuple val(meta), path("sum_signals.csv"), emit: signals
     path "updated_${vzg ? vzg.getName() : '.vzg'}", optional: true
     path  "versions.yml", emit: versions
-    tuple val(meta), path("${data}"), path("cell_by_gene.csv"), path("cell_metadata.csv"), emit: datacountsmeta
+    path "micron_to_mosaic_pixel_transform.csv"
+    tuple val(meta), path("cell_by_gene.csv"), path("cell_metadata.csv"), emit: datacountsmeta
 
     when:
     task.ext.when == null || task.ext.when
@@ -40,6 +41,8 @@ process VPT_QUANTIFICATION {
     """
     export HOME=$PWD
     export CELLPOSE_LOCAL_MODELS_PATH=/ei/projects/0/05407428-a659-41d6-a7bd-4567bf45e494/data/vizgen/models
+
+    cp -n ${transformation} .
 
     vpt \\
         --verbose --processes ${task.cpus} run-segmentation \\

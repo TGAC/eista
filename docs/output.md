@@ -13,7 +13,7 @@ The directories listed below will be created in the results directory after the 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
 
 - [Primary analysis](#primary-analysis)
-  - [Vizgen post-processing analysis](#vizgen-post-processing-analysis) - Cell segmentation and partition
+  - [Vizgen post-processing analysis](#vizgen-post-processing-analysis) - Cell segmentation and quantification
 - [Secondary analysis](#secondary-analysis)
   - [QC & cell filtering](#qc--cell-filtering) - Cell filtering and QC on raw data and filtered data
   - [Clustering analysis](#clustering-analysis) - Single-cell clustering analysis
