@@ -180,9 +180,9 @@ def main(argv=None):
     if args.integrate == 'bbknn':
         sc.external.pp.bbknn(adata, batch_key=batch_key, n_pcs=n_pcs)
     elif args.integrate == 'harmony':
-        sc.external.pp.harmony_integrate(adata, batch_key, n_pcs=n_pcs)
+        sc.external.pp.harmony_integrate(adata, batch_key)
     elif args.integrate == 'scanorama':
-        sc.external.pp.scanorama_integrate(adata, batch_key, n_pcs=n_pcs)
+        sc.external.pp.scanorama_integrate(adata, batch_key)
         
     # find nearest neighbor graph constuction
     pca_rep = 'X_pca'
