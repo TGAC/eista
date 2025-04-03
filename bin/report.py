@@ -291,6 +291,7 @@ def main(argv=None):
         elif util.check_file(f"{path_annotation}/group_*", ''):
             batch = 'group'
         Nbatch = len(samplesheet[batch].unique())
+        if Nbatch == 1: Nbatch = 2
         with report.add_section('Cell-type annotation', 'Annotation'):
             html.p(f"""This section presents cell-type annotation results using CellTypist which is an 
             automated tool for cell type annotation based on pre-trained models, capable of accurately 
@@ -299,6 +300,8 @@ def main(argv=None):
             confidence scores of the cells.""")            
             plots_from_image_files(path_annotation, suffix=['umap_cell_type.png'], meta=batch, widths=['900'])
             plots_from_image_files(path_annotation, suffix=['umap_conf_score.png'], meta=batch, widths=['600'])
+            html.p("""The following spatial scatter plot shows how cell-types are spatially mapped onto the tissue morphology.""") 
+            plots_from_image_files(path_annotation, suffix=['spatial_scatter_*.png'], meta=batch, widths=['1000'])
             html.p(f"""The following plot shows a stacked bar chart that presents the proportions 
                    of cell-type clusters across {batch}s. The plot illustrates the distribution 
                    profiles of predicted cell-type clusters between {batch}s.""")                   

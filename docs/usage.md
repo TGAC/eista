@@ -71,6 +71,7 @@ The pipeline wutest has following parameters:
 | --args_qccellfilter \<string> | Flagged argument settings for the process of Cell filtering and QC, e.g. "--min_genes 50 --min_cells 1" |
 | --args_clustering \<string> | Flagged argument settings for the process of clustering analysis, e.g. "--regress --scale" |
 | --args_spatialstats \<string> | Flagged argument settings for the process of spatial statistics analysis, e.g. "--cluster_keys leiden_res_0.50" |
+| --args_annotation \<string> | Flagged argument settings for the process of cell-type annotation analysis, e.g. "--model Immune_All_Low.pkl" |
 | --save_reference \<true/false> | A Boolean option, if set true the pipeline will save all the intermediate output files apart from end results (true by default). |
 
 
@@ -89,7 +90,7 @@ The pipline has 3 analysis phases:
    - Merging/integration of samples
    - Spatial statistics analysis
 3. **tertiary phase** inculdes analyses:    
-   - Cell type annotation (To be implemented)
+   - Cell type annotation
    - Differential expression analysis (To be implemented)
    - Other downstream analyses (To be implemented)
 
@@ -154,6 +155,38 @@ Users can set the options for spatial statistics analysis in the parameter `--ar
 | --fontsize  \<int> | Specify the font size for plots. (default=12) |
 
 For example, `--args_spatialstats "--cluster_keys leiden_res_0.50"`
+
+
+## Cell-type annotation analysis
+Users can set the options for cell-type annotation analysis in the parameter `--args_annotation`, which are as follows. 
+| Options   | Description |
+| ----------- | ----------- |
+| --model_file  \<string> | Specify a CellTypist model file for cell-type annotation analysis. |
+| --model  \<string> | Specify a CellTypist model name, igored if a model file specified. (default='Immune_All_Low.pkl')|
+| --mode  \<[best match, prob match]> | The way cell prediction is performed. 'best match' is to choose the cell type with the largest score/probability as the final prediction. Setting to 'prob match' will enable a multi-label classification, which assigns 0 (i.e., unassigned), 1, or >=2 cell type labels to each query cell. (default='best match')|
+| --p_thres  \<float> | Probability threshold for the multi-label classification. Ignored if mode is 'best match'. (default=0.5) |
+| --no_majority_voting | An switch of whether to disable the majority voting classifier after over-clustering. |
+| --update_models | An switch of whether to update CellTypist models. |
+| --meta  \<[auto, sample, group]> | Choose a metadata column as the batch classes on which the clustering UMAPs will be displayed. By default, it is set to 'auto', which means it will use the 'group' column as the batch classes if 'group' is defined in the samplesheet file; otherwise, it will use the 'sample' column. |
+| --fontsize  \<int> | Specify the font size for plots. (default=12) |
+
+For example, `--args_annotation "--model_file path-to-file/my_model.pkl"`
+
+
+## Training CellTypist models 
+Users can set the options for training CellTypist models in the parameter `--args_trainctmodel`, which are as follows. 
+| Options   | Description |
+| ----------- | ----------- |
+| --model_filename  \<string> | Specify a CellTypist model name. (default='celltypist_model.pkl')|
+| --labels \<string> | Specify a column of cell-type from cell metadata of Anndata. (default='cell_type')|
+| --l2c  \<float> | Inverse of L2 regularization strength for traditional logistic classifier. A smaller value can possibly improve model generalization while at the cost of decreased accuracy. This argument is ignored if SGD learning is enabled. (default=1.0) |
+| --alpha  \<float> | L2 regularization strength for SGD logistic classifier. A larger value can possibly improve model generalization while at the cost of decreased accuracy. This argument is ignored if SGD learning is disabled. (default=0.0001) |
+| --n_jobs  \<int> | Number of CPUs used, by default all CPUs are used. |
+| --feature_selection | An switch of whether to perform two-pass data training where the first round is used for selecting important features/genes using SGD learning. If True, the training time will be longer. |
+| --use_SGD | An switch of whether to implement SGD learning for the logistic classifier. |
+| --use_GPU | An switch of whether to use GPU for logistic classifier. |
+
+For example, `--args_trainctmodel "--model_filename test_model.pkl --labels majority_voting --feature_selection"`
 
 
 ## Running the pipeline

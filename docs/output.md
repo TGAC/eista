@@ -18,6 +18,8 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
   - [QC & cell filtering](#qc--cell-filtering) - Cell filtering and QC on raw data and filtered data
   - [Clustering analysis](#clustering-analysis) - Single-cell clustering analysis
   - [Spatial statistics analysis](#spatial-statistics-analysis) - Single-cell spatial statistics analysis
+- Tertiary analysis
+  - [Cell-type annotation analysis](#annotation-analysis) - Single-cell cell-type annotation analysis
 - [Pipeline reporting](#pipeline-reporting)
   - [Analysis report](#analysis-report) - Single-ell Analysis Report
   - [MultiQC](#multiqc) - Aggregate report describing results and QC for tools registered in nf-core
@@ -93,6 +95,19 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
   - `spatial_scatter_top_*.png`: spatial scatter plots showing top 6 genes among the highest Moran's I scores.
   - `spatial_scatter_bot_*.png`: spatial scatter plots showing top 6 genes among the lowest Moran's I scores.
 - `parameters.json`: a JSON file containing the parameter settings in the analysis.
+
+
+### <u>Annotation analysis</u>
+
+**Output directory: `results/annotation`**
+- `adata_annotation.h5ad`: AnnData object file after cell-type annotation analysis.
+- `sample_*/` or `group_*/`
+  - `umap_cell_type.png`: UMAP plots showing predicted cell-type clusters.
+  - `umap_conf_score.png`: UMAP plots showing mapped confidence scores of the cells.
+  - `spatial_scatter_*.png`: spatial scatter plot shows how cell-types are spatially mapped onto the tissue morphology.
+- `prop_majority_voting.png`: plot showing a stacked bar chart that presents the proportions of cell-type clusters across samples/groups.
+- `parameters.json`: a JSON file containing the parameter settings in the analysis.
+
 
 
 ## Pipeline reporting
