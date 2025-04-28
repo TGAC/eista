@@ -33,7 +33,7 @@
   - Merging/integration of samples 
   - Spatial statistics analysis - Neighbor enrichment analysis, calculating centrality scores and Moran's I score
 - **Tertiary analysis**
-  - Cell type annotation (to be implemented)
+  - Cell type annotation
   - Differential expression analysis (to be implemented)
   - Other downstream analyses (to be implemented)
 - **Pipeline reporting**
