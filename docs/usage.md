@@ -189,6 +189,27 @@ Users can set the options for training CellTypist models in the parameter `--arg
 For example, `--args_trainctmodel "--model_filename test_model.pkl --labels majority_voting --feature_selection"`
 
 
+## Differential expression analysis
+Users can set the options for differential analysis in the parameter `--args_dea`, which are as follows. 
+| Options   | Description |
+| ----------- | ----------- |
+| --groupby  \<string> | Specify a column of the observation table to define groups. (default='leiden') |
+| --groups  \<string> | Specify a subset of groups, e.g. 'group1,group2'. By defualt, all groups are chosen. (default='all') |
+| --reference  \<string> | Users can spcecify a group name as reference, and all other groups will be comapred against with this group. By default each group will be compared against rest of groups. (default='rest') |
+| --method  \<['t-test', 'wilcoxon', 'logreg', 't-test_overestim_var']> | Choose a test method for differential expression anlaysis. The default method is 't-test', 't-test_overestim_var' overestimates variance of each group, 'wilcoxon' uses Wilcoxon rank-sum, 'logreg' uses logistic regression. (default='t-test')|
+| --n_genes  \<int> | Number of top marker genes to show in plots. (default=20) |
+| --n_genes_s  \<int> | Number of top marker genes to show in spatial scatter plots. (default=2) |
+| --celltype_col \<string> | Spcecify a column of the observation table to define cell-types, and DEA will be performed between groups for each cell-type. |
+| --celltypes \<string> | Spcecify a subset of cell-types for DEA between groups, e.g. 'celltype1,celltype2'. By default all cell-types are used. (default='all') |
+| --meta  \<[auto, sample, group]> | Choose a metadata column as the batch classes on which the clustering UMAPs will be displayed. By default, it is set to 'auto', which means it will use the 'group' column as the batch classes if 'group' is defined in the samplesheet file; otherwise, it will use the 'sample' column. |
+| --fontsize  \<int> | Specify the font size for plots. (default=12) |
+
+For example:  
+`--args_dea "--groupby leiden_res_0.50"` - perform DEA to find marker genes for each cluster against the rest using clusters defined in column 'leiden_res_0.50' at group level if 'group' is defined in the samplesheet. Applying `--meta sample` to perform DEA at sample level.  
+`--args_dea "--groupby group --reference control"` - perform DEA to find DE genes between each group against the group 'control', groups are defined in column 'group'.  
+`--args_dea "--groupby group --reference control --celltype_col majority_voting"` - same as above but for each cell-type defined in column 'majority_voting'.
+
+
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:

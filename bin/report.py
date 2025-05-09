@@ -339,6 +339,8 @@ def main(argv=None):
                 html.p(f"""The following plots display the ranking of genes for one of the cell clusters against the rest of the clusters across {batch}s.""")                        
                 plots_from_image_files(path_dea, meta=batch, suffix=['plot_genes_*.png'])
                 plots_from_image_files(path_dea, meta=batch, suffix=['dotplot_genes_*.png'])
+                html.p("""The following spatial scatter plots show top marker genes onto the tissue morphology.""")
+                plots_from_image_files(path_dea, meta=batch, ncol=4, suffix=['spatial_scatter_*.png'])
 
             show_analysis_parameters(f"{path_dea}/parameters.json")                 
     else:

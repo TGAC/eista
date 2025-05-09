@@ -34,7 +34,7 @@
   - Spatial statistics analysis - Neighbor enrichment analysis, calculating centrality scores and Moran's I score
 - **Tertiary analysis**
   - Cell type annotation
-  - Differential expression analysis (to be implemented)
+  - Differential expression analysis
   - Other downstream analyses (to be implemented)
 - **Pipeline reporting**
   - Analysis report - Single-ell Analysis Report.

@@ -25,6 +25,7 @@ include { CLUSTERING_ANALYSIS } from "../modules/local/clustering_analysis"
 include { SPATIAL_STATISTICS } from "../modules/local/spatial_statistics"
 include { ANNOTATE_CELLS } from '../modules/local/annotate_cells'
 include { TRAIN_CT_MODEL } from '../modules/local/train_ct_model'
+include { RANK_GENES } from '../modules/local/rank_genes'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -195,12 +196,12 @@ workflow EISTA {
             ch_h5ad = ANNOTATE_CELLS.out.h5ad      
         }
         
-        // if (params.run_analyses.any{it=='tertiary' || it=='dea'} and !params.skip_analyses.contains('dea')) {
-        //     RANK_GENES (
-        //         ch_h5ad,
-        //     )
-        //     ch_versions = ch_versions.mix(RANK_GENES.out.versions)
-        // }
+        if (params.run_analyses.any{it=='tertiary' || it=='dea'} and !params.skip_analyses.contains('dea')) {
+            RANK_GENES (
+                ch_h5ad,
+            )
+            ch_versions = ch_versions.mix(RANK_GENES.out.versions)
+        }
    
         
     }
