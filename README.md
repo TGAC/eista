@@ -98,7 +98,7 @@ For more details and further functionality, please refer to the [usage documenta
 
 To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/eista/results) tab on the nf-core website pipeline page.
 For more details about the output files and reports, please refer to the
-[output documentation](https://github.com/TGAC/eisca/blob/master/docs/output.md).
+[output documentation](https://github.com/TGAC/eista/blob/master/docs/output.md).
 <!-- (https://nf-co.re/eista/output). -->
 
 ## Credits
