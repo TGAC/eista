@@ -91,13 +91,15 @@ nextflow run nf-core/eista \
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
 > see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
 
-For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/eista/usage) and the [parameter documentation](https://nf-co.re/eista/usage).
+For more details and further functionality, please refer to the [usage documentation](https://github.com/TGAC/eista/blob/master/docs/usage.md).
+<!-- (https://nf-co.re/eista/usage). -->
 
 ## Pipeline output
 
 To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/eista/results) tab on the nf-core website pipeline page.
 For more details about the output files and reports, please refer to the
-[output documentation](https://nf-co.re/eista/output).
+[output documentation](https://github.com/TGAC/eisca/blob/master/docs/output.md).
+<!-- (https://nf-co.re/eista/output). -->
 
 ## Credits
 
