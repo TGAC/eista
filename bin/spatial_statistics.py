@@ -16,7 +16,7 @@ from pathlib import Path
 from copy import deepcopy
 import util
 
-logger = util.get_named_logger('QC_CellFitering')
+logger = util.get_named_logger('SPATIAL_STATISTICS')
 
 
 def parse_args(argv=None):
@@ -97,6 +97,11 @@ def parse_args(argv=None):
         type=int,
         help="Set font size for plots.",
         default=12,
+    )
+    parser.add_argument(
+        "--pdf",
+        help="Whether to generate figure files in PDF format.",
+        action='store_true',
     )                      
     return parser.parse_args(argv)
 
@@ -169,6 +174,8 @@ def main(argv=None):
                     figsize=(16, 5)
                 )
                 plt.savefig(Path(path_statistics_s, f"centrality_scores_{cluster_key}.png"), bbox_inches="tight")
+                if args.pdf:
+                    plt.savefig(Path(path_statistics_s, f"centrality_scores_{cluster_key}.pdf"), bbox_inches="tight")
             with plt.rc_context():
                 sq.pl.spatial_scatter(
                     adata_s, 
@@ -179,6 +186,8 @@ def main(argv=None):
                     title=f"High closeness - {cluster_key}",
                 )
                 plt.savefig(Path(path_statistics_s, f"spatial_scatter_closeness_high_{cluster_key}.png"), bbox_inches="tight")
+                if args.pdf:
+                    plt.savefig(Path(path_statistics_s, f"spatial_scatter_closeness_high_{cluster_key}.pdf"), bbox_inches="tight")
             with plt.rc_context():
                 sq.pl.spatial_scatter(
                     adata_s, 
@@ -189,6 +198,8 @@ def main(argv=None):
                     title=f"Low closeness - {cluster_key}",
                 )
                 plt.savefig(Path(path_statistics_s, f"spatial_scatter_closeness_low_{cluster_key}.png"), bbox_inches="tight")
+                if args.pdf:
+                    plt.savefig(Path(path_statistics_s, f"spatial_scatter_closeness_low_{cluster_key}.pdf"), bbox_inches="tight")
             with plt.rc_context():
                 sq.pl.spatial_scatter(
                     adata_s, 
@@ -199,6 +210,8 @@ def main(argv=None):
                     title=f"High degree - {cluster_key}",
                 )
                 plt.savefig(Path(path_statistics_s, f"spatial_scatter_degree_high_{cluster_key}.png"), bbox_inches="tight")
+                if args.pdf:
+                    plt.savefig(Path(path_statistics_s, f"spatial_scatter_degree_high_{cluster_key}.pdf"), bbox_inches="tight")
             with plt.rc_context():
                 sq.pl.spatial_scatter(
                     adata_s, 
@@ -209,6 +222,8 @@ def main(argv=None):
                     title=f"Low degree - {cluster_key}",
                 )
                 plt.savefig(Path(path_statistics_s, f"spatial_scatter_degree_low_{cluster_key}.png"), bbox_inches="tight")
+                if args.pdf:
+                    plt.savefig(Path(path_statistics_s, f"spatial_scatter_degree_low_{cluster_key}.pdf"), bbox_inches="tight")
             with plt.rc_context():
                 sq.pl.spatial_scatter(
                     adata_s, 
@@ -219,6 +234,8 @@ def main(argv=None):
                     title=f"High clustering coefficient - {cluster_key}",
                 )
                 plt.savefig(Path(path_statistics_s, f"spatial_scatter_clustering_high_{cluster_key}.png"), bbox_inches="tight")
+                if args.pdf:
+                    plt.savefig(Path(path_statistics_s, f"spatial_scatter_clustering_high_{cluster_key}.pdf"), bbox_inches="tight")
             with plt.rc_context():
                 sq.pl.spatial_scatter(
                     adata_s, 
@@ -229,6 +246,8 @@ def main(argv=None):
                     title=f"Low clustering coefficient - {cluster_key}",
                 )
                 plt.savefig(Path(path_statistics_s, f"spatial_scatter_clustering_low_{cluster_key}.png"), bbox_inches="tight")
+                if args.pdf:
+                    plt.savefig(Path(path_statistics_s, f"spatial_scatter_clustering_low_{cluster_key}.pdf"), bbox_inches="tight")
 
             # Neighbors enrichment analysis
             sq.gr.nhood_enrichment(adata_s, cluster_key=cluster_key, show_progress_bar=False)
@@ -240,6 +259,8 @@ def main(argv=None):
                     title="Neighborhood enrichment heatmap",
                 )
                 plt.savefig(Path(path_statistics_s, f"neighbors_enrichment_{cluster_key}.png"), bbox_inches="tight")
+                if args.pdf:
+                    plt.savefig(Path(path_statistics_s, f"neighbors_enrichment_{cluster_key}.pdf"), bbox_inches="tight")
     
             # Ripley’s statistics
             # sq.gr.ripley(adata_s, cluster_key=cluster_key, mode='L')
@@ -285,6 +306,8 @@ def main(argv=None):
                     img=False,
                 )
                 plt.savefig(Path(path_statistics_s, f"spatial_scatter_top_{gene}.png"), bbox_inches="tight")
+                if args.pdf:
+                    plt.savefig(Path(path_statistics_s, f"spatial_scatter_top_{gene}.pdf"), bbox_inches="tight")
         for gene in adata_subsample.uns['moranI'].tail(6).index.tolist():
             with plt.rc_context():
                 sq.pl.spatial_scatter(
@@ -295,6 +318,8 @@ def main(argv=None):
                     img=False,
                 )
                 plt.savefig(Path(path_statistics_s, f"spatial_scatter_bot_{gene}.png"), bbox_inches="tight")
+                if args.pdf:
+                    plt.savefig(Path(path_statistics_s, f"spatial_scatter_bot_{gene}.pdf"), bbox_inches="tight")
 
 
 

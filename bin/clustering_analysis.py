@@ -15,7 +15,7 @@ import sys, json
 from pathlib import Path
 import util
 
-logger = util.get_named_logger('QC_CellFitering')
+logger = util.get_named_logger('CLUSTERING')
 
 
 def parse_args(argv=None):
@@ -82,7 +82,12 @@ def parse_args(argv=None):
         type=int,
         help="Set font size for plots.",
         default=12,
-    )                       
+    )
+    parser.add_argument(
+        "--pdf",
+        help="Whether to generate figure files in PDF format.",
+        action='store_true',
+    )                 
     return parser.parse_args(argv)
 
 
@@ -227,6 +232,8 @@ def main(argv=None):
                     show=False
                 )
                 plt.savefig(Path(path_clustering_s, f"umap_leiden_res_{res:4.2f}.png"), bbox_inches="tight")
+                if args.pdf:
+                    plt.savefig(Path(path_clustering_s, f"umap_leiden_res_{res:4.2f}.pdf"), bbox_inches="tight")
 
             with plt.rc_context():
                 sq.pl.spatial_scatter(
@@ -236,6 +243,8 @@ def main(argv=None):
                     wspace=0.4
                 )
                 plt.savefig(Path(path_clustering_s, f"spatial_scatter_leiden_res_{res:4.2f}.png"), bbox_inches="tight")
+                if args.pdf:
+                    plt.savefig(Path(path_clustering_s, f"spatial_scatter_leiden_res_{res:4.2f}.pdf"), bbox_inches="tight")
     
     # stacked proportion bar plot showing all samples for each resolution      
     for res in args.resolutions:
@@ -247,6 +256,8 @@ def main(argv=None):
             prop = pd.crosstab(adata.obs[f'leiden_res_{res:4.2f}'],adata.obs[batch], normalize='columns').T.plot(kind='bar', stacked=True)
             prop.legend(bbox_to_anchor=(1+(args.fontsize-10)/50+ncol*0.17, 1.02), loc='upper right', ncol=ncol)
             plt.savefig(Path(path_res, f"prop_leiden_res_{res:4.2f}.png"), bbox_inches="tight")
+            if args.pdf:
+                plt.savefig(Path(path_res, f"prop_leiden_res_{res:4.2f}.pdf"), bbox_inches="tight")
 
 
     # save analysis parameters into a json file

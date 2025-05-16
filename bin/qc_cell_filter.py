@@ -20,7 +20,7 @@ from pathlib import Path
 import util
 # from .util import get_named_logger,
 
-logger = util.get_named_logger('QC_CellFitering')
+logger = util.get_named_logger('QC_CELL_FILTER')
 
 
 
@@ -121,6 +121,11 @@ def parse_args(argv=None):
         type=int,
         help="Set font size for plots.",
         default=12,
+    )
+    parser.add_argument(
+        "--pdf",
+        help="Whether to generate figure files in PDF format.",
+        action='store_true',
     )
     # parser.add_argument(
     #     "--pct_mt",
@@ -231,6 +236,8 @@ def main(argv=None):
         with plt.rc_context():
             sc.pl.scatter(adata_s, "total_counts", "n_genes_by_counts", color="volume", show=False)
             plt.savefig(Path(path_sample, 'scatter_counts_genes_volume.png'), bbox_inches="tight")
+            if args.pdf:
+                plt.savefig(Path(path_sample, 'scatter_counts_genes_volume.pdf'), bbox_inches="tight")
 
         # violin plots for n_genes_by_counts, total_counts, volume
         path_sample = Path(path_quant_qc_raw, f"sample_{sid}")
@@ -245,6 +252,8 @@ def main(argv=None):
                     show=False
                 )
                 plt.savefig(Path(path_sample, f'violin{i}_{qc}.png'), bbox_inches="tight")
+                if args.pdf:
+                    plt.savefig(Path(path_sample, f'violin{i}_{qc}.pdf'), bbox_inches="tight")
 
 
         # histograms of distributions
@@ -258,6 +267,8 @@ def main(argv=None):
             axs[2].set_title("Volume of segmented cells")
             sns.histplot(adata_s.obs["volume"], kde=False, ax=axs[2])
             plt.savefig(Path(path_sample, f'histograms.png'), bbox_inches="tight")
+            if args.pdf:
+                plt.savefig(Path(path_sample, f'histograms.pdf'), bbox_inches="tight")
 
 
         # Cell filtering
@@ -332,7 +343,9 @@ def main(argv=None):
                     size=0.4,
                     show=False
                 )
-                plt.savefig(Path(path_sample, f'violin{i}_{qc}.png'), bbox_inches="tight")        
+                plt.savefig(Path(path_sample, f'violin{i}_{qc}.png'), bbox_inches="tight")
+                if args.pdf:        
+                    plt.savefig(Path(path_sample, f'violin{i}_{qc}.pdf'), bbox_inches="tight")        
 
         # histograms of distributions
         with plt.rc_context():
@@ -345,6 +358,8 @@ def main(argv=None):
             axs[2].set_title("Volume of segmented cells")
             sns.histplot(adata_s.obs["volume"], kde=False, ax=axs[2])
             plt.savefig(Path(path_sample, f'histograms.png'), bbox_inches="tight")
+            if args.pdf:
+                plt.savefig(Path(path_sample, f'histograms.pdf'), bbox_inches="tight")
 
         adatas[sid] = adata_s
 
@@ -366,6 +381,8 @@ def main(argv=None):
     with plt.rc_context():
         sc.pl.highly_variable_genes(adata, show=False)
         plt.savefig(Path(path_cell_filtering, 'highly_variable_genes.png'), bbox_inches="tight")
+        if args.pdf:
+            plt.savefig(Path(path_cell_filtering, 'highly_variable_genes.pdf'), bbox_inches="tight")
     sc.tl.pca(adata)
     sc.pp.neighbors(adata)
     sc.tl.umap(adata)
@@ -396,6 +413,8 @@ def main(argv=None):
                 show=False
             )
             plt.savefig(Path(path_cell_filtering_s, 'umap_total_counts_genes.png'), bbox_inches="tight")    
+            if args.pdf:
+                plt.savefig(Path(path_cell_filtering_s, 'umap_total_counts_genes.pdf'), bbox_inches="tight")    
 
         with plt.rc_context():
             sq.pl.spatial_scatter(
@@ -405,6 +424,8 @@ def main(argv=None):
                 wspace=0.4
             )
             plt.savefig(Path(path_cell_filtering_s, 'spatial_scatter_total_counts_genes.png'), bbox_inches="tight")
+            if args.pdf:
+                plt.savefig(Path(path_cell_filtering_s, 'spatial_scatter_total_counts_genes.pdf'), bbox_inches="tight")
 
     # add group column in adata.obs
     # if hasattr(samplesheet, 'group'):
@@ -436,7 +457,7 @@ def main(argv=None):
         params.update({"--min_cells": args.min_cells})        
         if args.quantile_upper < 1: params.update({"--quantile_upper": args.quantile_upper})        
         if args.quantile_lower > 0: params.update({"--quantile_lower": args.quantile_lower})        
-        params.update({"--iqr_coef": args.iqr_coef})        
+        params.update({"--iqr_coef": args.iqr_coef})       
         json.dump(params, file, indent=4)
 
 

@@ -19,7 +19,7 @@ import pandas as pd
 import sys
 
 
-logger = util.get_named_logger('Report')
+logger = util.get_named_logger('REPORT')
 
 report_title = 'EI Spatial Transcriptomics Analysis Report'
 workflow_name = 'eista'

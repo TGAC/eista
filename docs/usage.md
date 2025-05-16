@@ -91,7 +91,7 @@ The pipline has 3 analysis phases:
    - Spatial statistics analysis
 3. **tertiary phase** inculdes analyses:    
    - Cell type annotation
-   - Differential expression analysis (To be implemented)
+   - Differential expression analysis
    - Other downstream analyses (To be implemented)
 
 
@@ -122,6 +122,7 @@ Users can set the options for cell filtering in the parameter `--args_qccellfilt
 | --quantile_lower  \<float> | Filter genes by lower limit of quantile on number of genes. (default=0) |
 | --iqr_coef  \<int> | Remove outliers which larger than iqr_coef*IQR in total_counts. (default=2) |
 | --fontsize  \<int> | Specify the font size for plots. (default=12) |
+| --pdf | An switch of whether to generate figure files in PDF format. (false by default)|
 
 For example, `--args_qccellfilter "--min_genes 50 --max_volume 3000"`
 
@@ -138,6 +139,7 @@ Users can set the options for clustering analysis in the parameter `args_cluster
 | --integrate \<[bbknn, harmony]> | Choose a method for data integration across samples. Currently two integration algorighms can be choosen: 'bbknn' - a fast and intuitive batch effect removal method focus on local structure; 'harmony' - a popular global correction approach that iteratively adjusts the embedding of cells in lower-dimensional space, which is effective at correcting large batch effects, especially in datasets with complex batch structures. (default=None)|
 | --meta  \<[auto, sample, group]> | Choose a metadata column as the batch classes on which the clustering UMAPs will be displayed. By default, it is set to 'auto', which means it will use the 'group' column as the batch classes if 'group' is defined in the samplesheet file; otherwise, it will use the 'sample' column. |
 | --fontsize  \<int> | Specify the font size for plots. (default=12) |
+| --pdf | An switch of whether to generate figure files in PDF format. (false by default)|
 
 For example, `--args_clustering "--resolutions 0.1,0.2,0.3,0.5"`
 
@@ -153,6 +155,7 @@ Users can set the options for spatial statistics analysis in the parameter `--ar
 | --subsample_frac  \<float> | Subsample to this fraction of the number of cells. (default=1)  |
 | --meta  \<[auto, sample, group]> | Choose a metadata column as the batch classes on which the clustering UMAPs will be displayed. By default, it is set to 'auto', which means it will use the 'group' column as the batch classes if 'group' is defined in the samplesheet file; otherwise, it will use the 'sample' column. |
 | --fontsize  \<int> | Specify the font size for plots. (default=12) |
+| --pdf | An switch of whether to generate figure files in PDF format. (false by default)|
 
 For example, `--args_spatialstats "--cluster_keys leiden_res_0.50"`
 
@@ -169,6 +172,7 @@ Users can set the options for cell-type annotation analysis in the parameter `--
 | --update_models | An switch of whether to update CellTypist models. |
 | --meta  \<[auto, sample, group]> | Choose a metadata column as the batch classes on which the clustering UMAPs will be displayed. By default, it is set to 'auto', which means it will use the 'group' column as the batch classes if 'group' is defined in the samplesheet file; otherwise, it will use the 'sample' column. |
 | --fontsize  \<int> | Specify the font size for plots. (default=12) |
+| --pdf | An switch of whether to generate figure files in PDF format. (false by default)|
 
 For example, `--args_annotation "--model_file path-to-file/my_model.pkl"`
 
@@ -203,6 +207,7 @@ Users can set the options for differential analysis in the parameter `--args_dea
 | --celltypes \<string> | Spcecify a subset of cell-types for DEA between groups, e.g. 'celltype1,celltype2'. By default all cell-types are used. (default='all') |
 | --meta  \<[auto, sample, group]> | Choose a metadata column as the batch classes on which the clustering UMAPs will be displayed. By default, it is set to 'auto', which means it will use the 'group' column as the batch classes if 'group' is defined in the samplesheet file; otherwise, it will use the 'sample' column. |
 | --fontsize  \<int> | Specify the font size for plots. (default=12) |
+| --pdf | An switch of whether to generate figure files in PDF format. (false by default)|
 
 For example:  
 `--args_dea "--groupby leiden_res_0.50"` - perform DEA to find marker genes for each cluster against the rest using clusters defined in column 'leiden_res_0.50' at group level if 'group' is defined in the samplesheet. Applying `--meta sample` to perform DEA at sample level.  

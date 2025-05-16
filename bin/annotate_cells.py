@@ -86,7 +86,12 @@ def parse_args(argv=None):
         type=int,
         help="Set font size for plots.",
         default=12,
-    )           
+    )
+    parser.add_argument(
+        "--pdf",
+        help="Whether to generate figure files in PDF format.",
+        action='store_true',
+    )        
     return parser.parse_args(argv)
 
 
@@ -164,6 +169,8 @@ def main(argv=None):
                 show=False
             )
             plt.savefig(Path(path_annotation_s, f"umap_cell_type.png"), bbox_inches="tight")    
+            if args.pdf:
+                plt.savefig(Path(path_annotation_s, f"umap_cell_type.pdf"), bbox_inches="tight")    
 
         with plt.rc_context():
             sc.pl.umap(
@@ -173,6 +180,8 @@ def main(argv=None):
                 show=False
             )
             plt.savefig(Path(path_annotation_s, f"umap_conf_score.png"), bbox_inches="tight")          
+            if args.pdf:
+                plt.savefig(Path(path_annotation_s, f"umap_conf_score.pdf"), bbox_inches="tight")          
 
         with plt.rc_context():
             sq.pl.spatial_scatter(
@@ -182,6 +191,8 @@ def main(argv=None):
                 wspace=0.4
             )
             plt.savefig(Path(path_annotation_s, f"spatial_scatter_{label_type}.png"), bbox_inches="tight")
+            if args.pdf:
+                plt.savefig(Path(path_annotation_s, f"spatial_scatter_{label_type}.pdf"), bbox_inches="tight")
 
     # stacked proportion bar plot to compare between batches     
     n_cluster = len(adata.obs[label_type].unique())+1
@@ -190,6 +201,8 @@ def main(argv=None):
         prop = pd.crosstab(adata.obs[label_type], adata.obs[batch], normalize='columns').T.plot(kind='bar', stacked=True)
         prop.legend(bbox_to_anchor=(1.4+(args.fontsize-10)/50+ncol*0.17, 1.02), loc='upper right', ncol=ncol)
         plt.savefig(Path(path_annotation, f"prop_{label_type}.png"), bbox_inches="tight")    
+        if args.pdf:
+            plt.savefig(Path(path_annotation, f"prop_{label_type}.pdf"), bbox_inches="tight")    
 
 
     # save analysis parameters into a json file

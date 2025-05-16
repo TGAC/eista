@@ -17,7 +17,7 @@ import sys, json
 from pathlib import Path
 import util
 
-logger = util.get_named_logger('QC_CellFitering')
+logger = util.get_named_logger('DEA')
 
 
 def parse_args(argv=None):
@@ -94,7 +94,12 @@ def parse_args(argv=None):
         type=int,
         help="Set font size for plots.",
         default=12,
-    )                
+    )
+    parser.add_argument(
+        "--pdf",
+        help="Whether to generate figure files in PDF format.",
+        action='store_true',
+    )               
     return parser.parse_args(argv)
 
 
@@ -175,6 +180,8 @@ def main(argv=None):
                         fontsize=13,
                     )
                     plt.savefig(Path(path_analysis_s, f"plot_genes_group_{args.reference}.png"), bbox_inches="tight")
+                    if args.pdf:
+                        plt.savefig(Path(path_analysis_s, f"plot_genes_group_{args.reference}.pdf"), bbox_inches="tight")
 
                 with plt.rc_context():
                     sc.pl.rank_genes_groups_dotplot(
@@ -183,6 +190,8 @@ def main(argv=None):
                         groups=groups if groups!='all' else None,
                     )
                     plt.savefig(Path(path_analysis_s, f"dotplot_genes_group_{args.reference}.png"), bbox_inches="tight")
+                    if args.pdf:
+                        plt.savefig(Path(path_analysis_s, f"dotplot_genes_group_{args.reference}.pdf"), bbox_inches="tight")
 
                 for gid in groups:
                     sc.get.rank_genes_groups_df(adata_s, group=gid).to_csv(
@@ -206,6 +215,8 @@ def main(argv=None):
                     fontsize=13,
                 )
                 plt.savefig(Path(path_analysis, f"plot_genes_group_{args.reference}.png"), bbox_inches="tight")
+                if args.pdf:
+                    plt.savefig(Path(path_analysis, f"plot_genes_group_{args.reference}.pdf"), bbox_inches="tight")
 
             with plt.rc_context():
                 sc.pl.rank_genes_groups_dotplot(
@@ -214,6 +225,8 @@ def main(argv=None):
                     groups=groups if groups!='all' else None,
                 )
                 plt.savefig(Path(path_analysis, f"dotplot_genes_group_{args.reference}.png"), bbox_inches="tight")
+                if args.pdf:
+                    plt.savefig(Path(path_analysis, f"dotplot_genes_group_{args.reference}.pdf"), bbox_inches="tight")
 
             for gid in groups:
                 sc.get.rank_genes_groups_df(adata, group=gid).to_csv(
@@ -245,6 +258,8 @@ def main(argv=None):
                     fontsize=13,
                 )
                 plt.savefig(Path(path_analysis_s, f"plot_genes_{groupby}.png"), bbox_inches="tight")
+                if args.pdf:
+                    plt.savefig(Path(path_analysis_s, f"plot_genes_{groupby}.pdf"), bbox_inches="tight")
 
             with plt.rc_context():
                 sc.pl.rank_genes_groups_dotplot(
@@ -253,6 +268,8 @@ def main(argv=None):
                     groups=groups if groups!='all' else None,
                 )
                 plt.savefig(Path(path_analysis_s, f"dotplot_genes_{groupby}.png"), bbox_inches="tight")
+                if args.pdf:
+                    plt.savefig(Path(path_analysis_s, f"dotplot_genes_{groupby}.pdf"), bbox_inches="tight")
 
             for gid in sorted(adata_s.obs[groupby].unique() if groups=='all' else groups):
                 sc.get.rank_genes_groups_df(adata_s, group=gid).to_csv(
@@ -267,6 +284,8 @@ def main(argv=None):
                             color=gene,
                         )
                         plt.savefig(Path(path_analysis_s, f"spatial_scatter_{gid}_{gene}.png"), bbox_inches="tight")
+                        if args.pdf:
+                            plt.savefig(Path(path_analysis_s, f"spatial_scatter_{gid}_{gene}.pdf"), bbox_inches="tight")
 
 
     # save analysis parameters into a json file
