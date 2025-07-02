@@ -1,18 +1,21 @@
-process CLUSTERING_ANALYSIS {
+process CELLCELL_COMMUNICATION {
     label 'process_medium'
 
     conda "conda-forge::scanpy conda-forge::python-igraph conda-forge::leidenalg"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/villadsw/scanpy_squidpy:latest' :
-        'docker.io/myeihub/scanpy_squidpy:1.10.3_1.6.1' }"
+        'https://depot.galaxyproject.org/singularity/davele23/cellchat_sc_rst:latest' :
+        'docker.io/myeihub/cellchat_sc_rst:2.1.2' }"
 
     input:
-    path(h5ad_filtered)
+    path(countmtx)
+    path(metadata)
+    path(gene_ids)
+    path(cell_ids)
     // path samplesheet
 
     output:
-    path "clustering"
-    path "clustering/*.h5ad",  emit: h5ad
+    path "cellchat"
+    // path "clustering/*.h5ad",  emit: h5ad
     path "versions.yml",  emit: versions
 
     when:
@@ -21,15 +24,18 @@ process CLUSTERING_ANALYSIS {
     script:
     def args = task.ext.args ?: ''
     """
-    clustering_analysis.py \\
-        --h5ad ${h5ad_filtered} \\
-        --outdir clustering \\
+    cellcell_communication.R \\
+        --count ${countmtx} \\
+        --metadata ${metadata} \\
+        --gids ${gene_ids} \\
+        --cids ${cell_ids} \\
+        --outdir cellchat \\
         $args \\
 
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        python: \$(python --version | sed 's/Python //g')
+        cellchat: 2.1.2
     END_VERSIONS        
     """
 

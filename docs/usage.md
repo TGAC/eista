@@ -100,7 +100,7 @@ The pipeline parameters for Vizgen post-processsing analysis are as follows:
 | Options   | Description |
 | ----------- | ----------- |
 | --segmentation_algorithm  \<string> | Path to a json file that fully specifies the segmentation algorithm to use, including algorithm name, any algorithm specific parameters, stains corresponding to each channel in the algorithm. (default='assets/algorithms/cellpose_default_1_ZLevel.json')|
-| --tile_size  \<int> | Number of pixels for the width and height of each tile. Each tile is created as a square. (default=2400|
+| --tile_size  \<int> | Number of pixels for the width and height of each tile. Each tile is created as a square. (default=2400)|
 | --tile_overlap  \<int> | Overlap between adjacent tiles. Default is 10% of tile-size. (default=200)|
 
 For example, `--segmentation_algorithm assets/algorithms/cellpose_default_1_ZLevel.json`
@@ -213,6 +213,25 @@ For example:
 `--args_dea "--groupby leiden_res_0.50"` - perform DEA to find marker genes for each cluster against the rest using clusters defined in column 'leiden_res_0.50' at group level if 'group' is defined in the samplesheet. Applying `--meta sample` to perform DEA at sample level.  
 `--args_dea "--groupby group --reference control"` - perform DEA to find DE genes between each group against the group 'control', groups are defined in column 'group'.  
 `--args_dea "--groupby group --reference control --celltype_col majority_voting"` - same as above but for each cell-type defined in column 'majority_voting'.
+
+
+## Cell-cell communication analysis
+Users can set the options for cell-cell communication analysis in the parameter `--args_cellchat`, which are as follows. 
+| Options   | Description |
+| ----------- | ----------- |
+| --group  \<string> | Specify the column from metadata for grouping the cells. (default=majority_voting)|
+| --normalize | Indicates whether to normalize the counts.|
+| --db  \<[human, mouse]> | Specify the species of CellChatDB. (default=human) |
+| --dbc  \<string> | Specify the categories of CellChatDB, e.g. Secreted Signaling. |
+| --dbenps | Indicates whether to use all CellChatDB excepting 'Non-protein Signaling'  |
+| --threads  \<int> | Number of threads for parallel runs. (default=4) |
+| --mean_method  \<[trimean, truncatedMean]> | Specify the method for calculating the average gene expression per cell group. Method trimean produces fewer interactions than method truncatedMean. (default=trimean) |
+| --mincells  \<int> | The minimum number of cells required in each cell group. (default=10) |
+| --meta  \<[auto, sample, group]> | Choose a metadata column to define separate subsets of cells for analysis. (default=auto)|
+| --pdf | An switch of whether to generate figure files in PDF format. (false by default)|
+
+For example, `--args_cellchat "--group cellType --mean_method truncatedMean"`
+
 
 
 ## Running the pipeline

@@ -146,6 +146,7 @@ def main(argv=None):
     path_spatialstats = Path(args.results, 'spatialstats')
     path_annotation = Path(args.results, 'annotation')
     path_dea = Path(args.results, 'dea')
+    path_cellchat = Path(args.results, 'cellchat')
 
     # print(path_quant_qc) #tst
 
@@ -345,6 +346,52 @@ def main(argv=None):
             show_analysis_parameters(f"{path_dea}/parameters.json")                 
     else:
         logger.info('Skipping differential expression analysis')
+
+
+    if path_cellchat.exists():
+        if util.check_file(f"{path_cellchat}/sample_*", ''):
+            batch = 'sample'
+        elif util.check_file(f"{path_cellchat}/group_*", ''):
+            batch = 'group'        
+        with report.add_section('Cell-cell communication analysis', 'CellChat'):
+            html.p("""This section presents the results of the cell–cell communication analysis using CellChat. These 
+                   results enable users to identify, analyze, and visualize intercellular communication networks between 
+                   cell groups from scRNA-seq data, based on the CellChat database of ligand–receptor interactions.""")
+
+            # showing the aggregated cell-cell communication network
+            if util.check_file(f"{path_cellchat}/{batch}_*", 'aggregated_network_all.png'):
+                html.p(f"""The following plots show the aggregated cell-cell communication network, either by counting the 
+                       number of links or by summarizing communication probabilities (weights). These circle plots provide 
+                       an overview of cell-cell interactions: the left plot shows the number of interactions, while the right 
+                       plot displays the total interaction strength between cell groups. Thicker edge lines indicate stronger 
+                       signals, and the circle sizes are proportional to the number of cells in each group.""")                        
+                plots_from_image_files(path_cellchat, meta=batch, ncol=2, suffix=['aggregated_network_all*.png'])
+
+            # showing the aggregated cell-cell communication network for each signaling pathway
+            if util.check_file(f"{path_cellchat}/{batch}_*", 'pathway_network_circle_*.png'):
+                html.p(f"""The following plots show the aggregated (weighted) cell-cell communication networks for 
+                       individual signalling pathways with significant ligand-receptor interactions.""")                        
+                plots_from_image_files(path_cellchat, meta=batch, ncol=2, suffix=['pathway_network_circle_*.png'])
+
+            # showing the aggregated cell-cell communication network for each signaling pathway (heatmap)
+            if util.check_file(f"{path_cellchat}/{batch}_*", 'pathway_network_heatmap_*.png'):
+                html.p(f"""The following heatmaps show interaction strength in the cell-cell communication network between 
+                       pairs of cell groups, with the y-axis representing sender cells and the x-axis representing receiver 
+                       cells. The top bar plot shows the column-wise sums of the heatmap values, while the right bar plot 
+                       shows the row-wise sums.""")                        
+                plots_from_image_files(path_cellchat, meta=batch, ncol=2, suffix=['pathway_network_heatmap_*.png'])
+
+            # showing significant interactions (L-R pairs) from each cell group to other cell groups
+            if util.check_file(f"{path_cellchat}/{batch}_*", 'cellcell_LR_bubble_*.png'):
+                html.p(f"""The following bubble plots show all significant interactions (ligand-receptor pairs) from each 
+                       cell group to others. The color and size of each dot represent the communication probability and 
+                       p-value, respectively. This visualization shows how cell-cell communication is mediated by multiple 
+                       ligand-receptor pairs.""")                        
+                plots_from_image_files(path_cellchat, meta=batch, ncol=2, suffix=['cellcell_LR_bubble_*.png'])
+
+            show_analysis_parameters(f"{path_cellchat}/parameters.json")                 
+    else:
+        logger.info('Skipping cell-cell communication analysis')
 
 
     report.write(args.report)

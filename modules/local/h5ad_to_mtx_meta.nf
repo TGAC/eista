@@ -1,30 +1,32 @@
-process CLUSTERING_ANALYSIS {
+process H5AD_TO_MTX_META {
     label 'process_medium'
 
     conda "conda-forge::scanpy conda-forge::python-igraph conda-forge::leidenalg"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/villadsw/scanpy_squidpy:latest' :
-        'docker.io/myeihub/scanpy_squidpy:1.10.3_1.6.1' }"
+        'https://depot.galaxyproject.org/singularity/scanpy-scripts:1.9.301--pyhdfd78af_0' :
+        'biocontainers/scanpy-scripts:1.9.301--pyhdfd78af_0' }"
 
     input:
-    path(h5ad_filtered)
+    path(h5ad_annotated)
     // path samplesheet
 
     output:
-    path "clustering"
-    path "clustering/*.h5ad",  emit: h5ad
+    path "h5ad_mtx_meta"
+    path "h5ad_mtx_meta/counts.mtx",  emit: h5ad_mtx
+    path "h5ad_mtx_meta/metadata.csv",  emit: h5ad_meta
+    path "h5ad_mtx_meta/genes.csv",  emit: h5ad_genes
+    path "h5ad_mtx_meta/cells.csv",  emit: h5ad_cells
     path "versions.yml",  emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args ?: ''
+    // def args = task.ext.args ?: ''
     """
-    clustering_analysis.py \\
-        --h5ad ${h5ad_filtered} \\
-        --outdir clustering \\
-        $args \\
+    h5ad_to_mtx_meta.py \\
+        --h5ad ${h5ad_annotated} \\
+        --outdir h5ad_mtx_meta \\
 
 
     cat <<-END_VERSIONS > versions.yml

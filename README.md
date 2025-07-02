@@ -35,6 +35,7 @@
 - **Tertiary analysis**
   - Cell type annotation
   - Differential expression analysis
+  - Cell-cell communication analysis
   - Other downstream analyses (to be implemented)
 - **Pipeline reporting**
   - Analysis report - Single-ell Analysis Report.
