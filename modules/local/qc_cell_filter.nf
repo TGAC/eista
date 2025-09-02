@@ -20,6 +20,8 @@ process QC_CELL_FILTER {
 
     script:
     def args = task.ext.args ?: ''
+
+    if (params.technology == "vizgen")
     """
     qc_cell_filter.py \\
         --h5ad ${h5ad_raw} \\
@@ -33,7 +35,21 @@ process QC_CELL_FILTER {
         python: \$(python --version | sed 's/Python //g')
     END_VERSIONS        
     """
+    
+    else if (params.technology == "xenium")
+    """
+    qc_cell_filter_xenium.py \\
+        --h5ad ${h5ad_raw} \\
+        --samplesheet ${samplesheet} \\
+        --outdir qc_cell_filter \\
+        $args \\
 
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: \$(python --version | sed 's/Python //g')
+    END_VERSIONS        
+    """
 
 
     // stub:

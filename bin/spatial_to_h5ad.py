@@ -12,6 +12,8 @@ import pandas as pd
 import argparse
 import sys
 from pathlib import Path
+import spatialdata as sd
+from spatialdata_io import xenium
 import util
 
 logger = util.get_named_logger('SPATIAL_TO_H5AD')
@@ -86,7 +88,10 @@ def main(argv=None):
             meta_file=str(args.metadata),
             transformation_file=str(args.transformation) if args.transformation.is_file() else None,
         )
-        
+    elif args.tech == 'xenium':
+        xenium_path = args.datadir
+        sdata = xenium(xenium_path)
+        adata = sdata.tables["table"]
 
 
     # save the AnnData into a h5ad file

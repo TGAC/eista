@@ -37,17 +37,17 @@ scanpy,1.9.8
 squidpy,1.6.1
 anndata,0.10.5.post1
 celltypist,1.6.3
+cellchat,2.1.2
 EOF
 
     report.py \\
-        $report_name \\
+        --report_html $report_name \\
+        --tech ${params.technology} \\
         --results ${results} \\
         --versions versions.txt \\
         --params params.json \\
         --wf-version ${workflow.manifest.version} \\
-        --logo ${workflow.projectDir}/bin/images/EI_logo.png \\
-        --samplesheet ${samplesheet} \\          
-
-
+        --logo "${workflow.projectDir}/bin/images/EI_logo.png" \\
+        --samplesheet ${samplesheet}
     """
 }

@@ -54,7 +54,7 @@ def parse_args(argv=None):
         "--min_genes",
         type=int,
         help="Filter cells by minimum number of genes.",
-        default=100,
+        default=50,
     )
     parser.add_argument(
         "--max_genes",
@@ -87,15 +87,15 @@ def parse_args(argv=None):
         default=0,
     )
     parser.add_argument(
-        "--max_volume",
+        "--max_area",
         type=int,
-        help="Filter cells by maximum cell volume.",
+        help="Filter cells by maximum cell area.",
         default=0,
     )         
     parser.add_argument(
-        "--min_volume",
+        "--min_area",
         type=int,
-        help="Filter cells by minimum cell volume.",
+        help="Filter cells by minimum cell area.",
         default=0,
     )
     parser.add_argument(
@@ -221,13 +221,13 @@ def main(argv=None):
         # create summary csv file for all samples
         n_cells_raw = adata_s.obs[adata_s.obs['n_genes_by_counts']>0].shape[0]
         n_genes_raw = adata_s.var[adata_s.var['n_cells_by_counts']>0].shape[0]
-        
+
         summary += [{
             f"{sample.capitalize()} ID": sid,
             'Number of cells': n_cells_raw,
             'Number of genes': n_genes_raw,
             'Median genes per cell': np.median(adata_s.obs['n_genes_by_counts']),
-            'Median of volume': "{:.4f}".format(np.median(adata_s.obs['volume'])),
+            'Median of cell area': "{:.4f}".format(np.median(adata_s.obs['cell_area'])),
         }]
 
         # scatter plots on total_counts against n_genes_by_counts
@@ -235,15 +235,15 @@ def main(argv=None):
         util.check_and_create_folder(path_sample)
 
         with plt.rc_context():
-            sc.pl.scatter(adata_s, "total_counts", "n_genes_by_counts", color="volume", show=False)
-            plt.savefig(Path(path_sample, 'scatter_counts_genes_volume.png'), bbox_inches="tight")
+            sc.pl.scatter(adata_s, "total_counts", "n_genes_by_counts", color="cell_area", show=False)
+            plt.savefig(Path(path_sample, 'scatter_counts_genes_area.png'), bbox_inches="tight")
             if args.pdf:
-                plt.savefig(Path(path_sample, 'scatter_counts_genes_volume.pdf'), bbox_inches="tight")
+                plt.savefig(Path(path_sample, 'scatter_counts_genes_area.pdf'), bbox_inches="tight")
 
-        # violin plots for n_genes_by_counts, total_counts, volume
+        # violin plots for n_genes_by_counts, total_counts, area
         path_sample = Path(path_quant_qc_raw, f"sample_{sid}")
         util.check_and_create_folder(path_sample)
-        for i, qc in enumerate(["n_genes_by_counts", "total_counts", "volume"]):
+        for i, qc in enumerate(["n_genes_by_counts", "total_counts", "cell_area"]):
             with plt.rc_context():
                 sc.pl.violin(
                     adata_s,
@@ -265,8 +265,8 @@ def main(argv=None):
             sns.histplot(adata_s.obs["total_counts"], kde=False, ax=axs[0])
             axs[1].set_title("Unique transcripts per cell")
             sns.histplot(adata_s.obs["n_genes_by_counts"], kde=False, ax=axs[1])
-            axs[2].set_title("Volume of segmented cells")
-            sns.histplot(adata_s.obs["volume"], kde=False, ax=axs[2])
+            axs[2].set_title("Area of segmented cells")
+            sns.histplot(adata_s.obs["cell_area"], kde=False, ax=axs[2])
             plt.savefig(Path(path_sample, f'histograms.png'), bbox_inches="tight")
             if args.pdf:
                 plt.savefig(Path(path_sample, f'histograms.pdf'), bbox_inches="tight")
@@ -282,10 +282,10 @@ def main(argv=None):
             sc.pp.filter_cells(adata_s, max_genes=args.max_genes)
         if args.max_counts > 0:
             sc.pp.filter_cells(adata_s, max_counts=args.max_counts)
-        if args.min_volume > 0:
-            adata_s = adata_s[adata_s.obs.volume.values > args.min_volume]
-        if args.max_volume > 0:
-            adata_s = adata_s[adata_s.obs.volume.values < args.max_volume]
+        if args.min_area > 0:
+            adata_s = adata_s[adata_s.obs.cell_area.values > args.min_area]
+        if args.max_area > 0:
+            adata_s = adata_s[adata_s.obs.cell_area.values < args.max_area]
 
         elif args.iqr_coef > 0:
             q1 = np.percentile(adata_s.obs.total_counts.values, 25)
@@ -326,16 +326,16 @@ def main(argv=None):
             'Number of cells': f"{n_cells} ({n_cells/n_cells_raw:.0%})",
             'Number of genes': f"{n_genes} ({n_genes/n_genes_raw:.0%})",
             'Median genes per cell': np.median(obs_s['n_genes_by_counts']),
-            'Median of volume': "{:.4f}".format(np.median(obs_s['volume'])),
+            'Median of cell area': "{:.4f}".format(np.median(obs_s['cell_area'])),
         }]
 
 
-        # distributions of n_genes_by_counts, total_counts and volume after filtering
+        # distributions of n_genes_by_counts, total_counts and area after filtering
         path_sample = Path(path_cell_filtering, f"sample_{sid}")
         util.check_and_create_folder(path_sample)
 
-        # violin plots for n_genes_by_counts, total_counts, volume
-        for i, qc in enumerate(["n_genes_by_counts", "total_counts", "volume"]):
+        # violin plots for n_genes_by_counts, total_counts, area
+        for i, qc in enumerate(["n_genes_by_counts", "total_counts", "cell_area"]):
             with plt.rc_context():
                 sc.pl.violin(
                     adata_s[~adata_s.obs['predicted_doublet']] if hasattr(adata_s.obs, 'predicted_doublet') else adata_s,
@@ -356,8 +356,8 @@ def main(argv=None):
             sns.histplot(adata_s.obs["total_counts"], kde=False, ax=axs[0])
             axs[1].set_title("Unique transcripts per cell")
             sns.histplot(adata_s.obs["n_genes_by_counts"], kde=False, ax=axs[1])
-            axs[2].set_title("Volume of segmented cells")
-            sns.histplot(adata_s.obs["volume"], kde=False, ax=axs[2])
+            axs[2].set_title("Area of segmented cells")
+            sns.histplot(adata_s.obs["cell_area"], kde=False, ax=axs[2])
             plt.savefig(Path(path_sample, f'histograms.png'), bbox_inches="tight")
             if args.pdf:
                 plt.savefig(Path(path_sample, f'histograms.pdf'), bbox_inches="tight")
@@ -453,8 +453,8 @@ def main(argv=None):
         if args.max_genes > 0: params.update({"--max_genes": args.max_genes})
         if args.max_counts > 0: params.update({"--max_counts": args.max_counts})
         if args.min_gcounts > 0: params.update({"--min_gcounts": args.min_gcounts})
-        if args.min_volume > 0: params.update({"--min_volume": args.min_volume})
-        if args.max_volume > 0: params.update({"--max_volume": args.max_volume})
+        if args.min_area > 0: params.update({"--min_area": args.min_area})
+        if args.max_area > 0: params.update({"--max_area": args.max_area})
         params.update({"--min_cells": args.min_cells})        
         if args.quantile_upper < 1: params.update({"--quantile_upper": args.quantile_upper})        
         if args.quantile_lower > 0: params.update({"--quantile_lower": args.quantile_lower})        

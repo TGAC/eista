@@ -32,7 +32,10 @@ def parse_args(argv=None):
         description="Quality control before and after cell filtering",
         # epilog="python count_reads_from_bam.py --bam file.bam --bed file.bed --json output.json",
     )
-    parser.add_argument("report", help="Report output file")
+    parser.add_argument(
+        "--report_html", 
+        help="Report output file"
+    )
     parser.add_argument(
         "--results",
         metavar="RESULTS_DIR",
@@ -87,6 +90,11 @@ def parse_args(argv=None):
         type=Path,
         help="Input samplesheet file.",
         required=True,
+    )
+    parser.add_argument(
+        "--tech",
+        help="The spatial single-cell technology.",
+        required=True,
     )           
     return parser.parse_args(argv)
 
@@ -136,6 +144,9 @@ def main(argv=None):
     # Nbatch = len(samplesheet[batch].unique())
     # samples = samplesheet['sample'].unique()
 
+    cell_size_unit = 'volume'
+    if args.tech == 'xenium': cell_size_unit = 'area'
+
     path_quant_qc = Path(args.results, 'qc_cell_filter')
     path_quant_qc_raw = Path(path_quant_qc, 'raw_counts')
     # path_quant_qc_scatter = Path(path_quant_qc, 'scatter')
@@ -154,24 +165,24 @@ def main(argv=None):
         summary = pd.read_csv(Path(path_quant_qc, 'sample_summary.csv')).set_index(f"{sample.capitalize()} ID")
         Nsample = summary.shape[0]
         with report.add_section('Single cell summary', 'Summary'):
-            html.p("""This section gives an overall summary of the single-cell count matrix for 
+            html.p(f"""This section gives an overall summary of the single-cell count matrix for 
                    each sample. The statistics include the total number of cells with at least 
                    one gene expressed, the total number of genes expressed in at least one cell, 
-                   the median number of genes per cell, and the volume of segmented cells.""")
+                   the median number of genes per cell, and the {cell_size_unit} of segmented cells.""")
             DataTable.from_pandas(summary)   
 
         with report.add_section('Quantification QC', 'QC'):
             html.p("""This section presents the QC plots of the raw count matrix generated during 
                    the quantification step. These plots provide insight into the quality of the 
                    experiments and guide the filtering of low-quality cells.""")
-            html.p("""The following scatter plot shows the relationship between total 
-                   read counts and the number of genes, with the volume of segmented cells indicated by color.""")
+            html.p(f"""The following scatter plot shows the relationship between total 
+                   read counts and the number of genes, with the {cell_size_unit} of segmented cells indicated by color.""")
             plots_from_image_files(path_quant_qc_raw, meta='sample', widths=['800'], suffix=['scatter*.png'])
-            html.p("""The following violin plots display the distribution of cells based on the number of 
-                   genes, total counts, and cell volumes.""")
+            html.p(f"""The following violin plots display the distribution of cells based on the number of 
+                   genes, total counts, and cell {cell_size_unit}s.""")
             plots_from_image_files(path_quant_qc_raw, meta='sample', ncol=3, suffix=['violin*.png'])
-            html.p("""The following histogram plots display the distribution of cells based on the number of 
-                   genes, total counts, and cell volumes.""")
+            html.p(f"""The following histogram plots display the distribution of cells based on the number of 
+                   genes, total counts, and cell {cell_size_unit}s.""")
             plots_from_image_files(path_quant_qc_raw, meta='sample', suffix=['histograms.png'])
     else:
         logger.info('Skipping Quantification QC')
@@ -179,18 +190,18 @@ def main(argv=None):
     if path_cell_filtering.exists():
         summary = pd.read_csv(Path(path_cell_filtering, 'sample_summary_filtered.csv')).set_index(f"{sample.capitalize()} ID")
         with report.add_section('Cell filtering', 'Cell filtering'):
-            html.p("""This section presents the statistics and QC plots after cell filtering process. 
+            html.p(f"""This section presents the statistics and QC plots after cell filtering process. 
                    The filtering process includes hard thresholds for minimum genes, minimum counts, 
-                   minimum cells and the volume of segmented cells. Additionally, 
+                   minimum cells and the {cell_size_unit} of segmented cells. Additionally, 
                    users can set quantile limits on the number of genes.""")
             html.p("""The following table shows summary statistics, with percentages in brackets 
                    indicating the comparison to the raw counts.""")
             DataTable.from_pandas(summary)
-            html.p("""The following violin plots display the distribution of cells based on the number of 
-                   genes, total counts, and cell volumes after filtering.""")
+            html.p(f"""The following violin plots display the distribution of cells based on the number of 
+                   genes, total counts, and cell {cell_size_unit}s after filtering.""")
             plots_from_image_files(path_cell_filtering, meta='sample', ncol=3, suffix=['violin*.png'])            
-            html.p("""The following histogram plots display the distribution of cells based on the number of 
-                   genes, total counts, and cell volumes.""")
+            html.p(f"""The following histogram plots display the distribution of cells based on the number of 
+                   genes, total counts, and cell {cell_size_unit}s.""")
             plots_from_image_files(path_cell_filtering, meta='sample', suffix=['histograms.png'])
             # html.p("""The following plots show the UMAP plots for the number of genes, total counts.""")                        
             # plots_from_image_files(path_cell_filtering, meta='sample', suffix=['umap_total*.png'])
@@ -394,7 +405,7 @@ def main(argv=None):
         logger.info('Skipping cell-cell communication analysis')
 
 
-    report.write(args.report)
+    report.write(args.report_html)
     logger.info('Report writing finished')
     
 

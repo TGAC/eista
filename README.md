@@ -19,7 +19,7 @@
 
 ## Introduction
 
-**nf-core/eista** is a bioinformatics pipeline that perform analysis for single-cell spatial transcriptomics data (Vizgen data). The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes (implemented and to be implemented) are as follows:
+**nf-core/eista** is a bioinformatics pipeline that perform analysis for single-cell spatial transcriptomics data (Vizgen data and 10x Xenium data). The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes (implemented and to be implemented) are as follows:
 
 - **Primary analysis**
   - Cell segmentation - defines cell boundaries from images 

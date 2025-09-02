@@ -1,0 +1,37 @@
+nextflow_pipeline {
+
+    name "Test Workflow main.nf"
+    script "main.nf"
+    profile "test,docker"
+
+    test("Should run without failures") {
+
+        when {
+            params {
+                // define parameters here. Example: 
+                // outdir = "tests/results"
+                outdir = "$outputDir"
+            }
+        }
+
+        // then {
+        //     assert workflow.success
+        // }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert new File("$outputDir/vizgen/mtx_conversions/combined_st_matrix.h5ad").exists() },
+                { assert new File("$outputDir/qc_cell_filter/adata_filtered_normalized.h5ad").exists() },
+                { assert new File("$outputDir/spatialstats/parameters.json").exists() },
+                { assert new File("$outputDir/h5ad_mtx_meta/cells.csv").exists() },
+                { assert new File("$outputDir/h5ad_mtx_meta/genes.csv").exists() },
+                { assert new File("$outputDir/h5ad_mtx_meta/metadata.csv").exists() },
+                { assert new File("$outputDir/h5ad_mtx_meta/counts.mtx").exists() },
+                { assert new File("$outputDir/clustering/adata_clustering.h5ad").exists() }
+            )
+        }
+
+    }
+
+}

@@ -194,11 +194,12 @@ def main(argv=None):
             if args.pdf:
                 plt.savefig(Path(path_annotation_s, f"spatial_scatter_{label_type}.pdf"), bbox_inches="tight")
 
-    # stacked proportion bar plot to compare between batches     
+    # stacked proportion bar plot to compare between batches
+    sc.pl.umap(adata, color=label_type, show=False) # get adata.uns['_colors']
     n_cluster = len(adata.obs[label_type].unique())+1
     ncol = min((n_cluster//20 + min(n_cluster%20, 1)), 3)
     with plt.rc_context():
-        prop = pd.crosstab(adata.obs[label_type], adata.obs[batch], normalize='columns').T.plot(kind='bar', stacked=True)
+        prop = pd.crosstab(adata.obs[label_type], adata.obs[batch], normalize='columns').T.plot(kind='bar', stacked=True, color=adata.uns[f"{label_type}_colors"])
         prop.legend(bbox_to_anchor=(1.4+(args.fontsize-10)/50+ncol*0.17, 1.02), loc='upper right', ncol=ncol)
         plt.savefig(Path(path_annotation, f"prop_{label_type}.png"), bbox_inches="tight")    
         if args.pdf:

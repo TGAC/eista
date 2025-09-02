@@ -19,6 +19,7 @@ include { VPT_QUANTIFICATION } from '../modules/local/vpt_quantification'
 // include { VPT_UPDATE_VZG } from '../modules/local/vpt_update_vzg'
 // include { MTX_CONVERSION } from "../subworkflows/local/mtx_conversion"
 include { SPATIAL_TO_H5AD } from '../modules/local/spatial_to_h5ad'
+include { SPATIAL_TO_H5AD_XENIUM } from '../modules/local/spatial_to_h5ad_xenium'
 include { CONCAT_H5AD } from '../modules/local/concat_h5ad'
 include { QC_CELL_FILTER } from "../modules/local/qc_cell_filter"
 include { CLUSTERING_ANALYSIS } from "../modules/local/clustering_analysis"
@@ -61,7 +62,6 @@ workflow EISTA {
     //===================================== Primary anaysis stage =====================================
 
     if (params.run_analyses.contains('primary')){
-
         if (params.technology == "vizgen") {
             if (!params.skip_analyses.contains('quantification')) {
 
@@ -70,10 +70,25 @@ workflow EISTA {
                     ch_samplesheet.map{ meta, data -> file("${data[0]}/*.vzg") }
                 )
                 ch_versions = ch_versions.mix(VPT_QUANTIFICATION.out.versions)
-                ch_datacountsmeta = VPT_QUANTIFICATION.out.datacountsmeta
+                VPT_QUANTIFICATION.out.datacountsmeta.set{ch_datacountsmeta}
                 // ch_counts = VPT_QUANTIFICATION.out.counts
                 // ch_metadata = VPT_QUANTIFICATION.out.metadata
             }
+            SPATIAL_TO_H5AD (
+                Channel.value(file(params.outdir)),
+                ch_datacountsmeta
+            )
+            // ch_versions = ch_versions.mix(SPATIAL_TO_H5AD.out.versions)
+            ch_concat_h5ad_input = SPATIAL_TO_H5AD.out.h5ad.groupTuple()
+
+        } else if (params.technology == "xenium") {
+
+            SPATIAL_TO_H5AD_XENIUM (
+                Channel.value(file(params.outdir)),
+                ch_samplesheet
+            )
+            // ch_versions = ch_versions.mix(SPATIAL_TO_H5AD_XENIUM.out.versions)
+            ch_concat_h5ad_input = SPATIAL_TO_H5AD_XENIUM.out.h5ad.groupTuple()
         }
 
         // Run mtx to h5ad conversion subworkflow
@@ -89,13 +104,7 @@ workflow EISTA {
         // .join(ch_counts, by: [0]).map{ meta, data, counts -> tuple(meta, data, counts) }
         // .join(ch_metadata, by: [0]).map{ meta, data, counts, metadata -> tuple(meta, data, counts, metadata) }
         // .set { ch_data_counts_meta }
-        SPATIAL_TO_H5AD (
-            Channel.value(file(params.outdir)),
-            ch_datacountsmeta
-        )
-        // ch_versions = ch_versions.mix(SPATIAL_TO_H5AD.out.versions)
-
-        ch_concat_h5ad_input = SPATIAL_TO_H5AD.out.h5ad.groupTuple()
+        
         CONCAT_H5AD (
             ch_concat_h5ad_input,
             samplesheet
@@ -162,7 +171,7 @@ workflow EISTA {
 
     //===================================== Tertiary anaysis stage =====================================
 
-    if (!params.run_analyses.intersect(['tertiary', 'annotation', 'dea', 'cellchat']).is()){
+    if (!params.run_analyses.intersect(['tertiary', 'annotation', 'dea', 'cellchat']).isEmpty()){
     
         // Get input h5ad file
         ch_h5ad = Channel.empty()
