@@ -38,9 +38,12 @@ process VPT_QUANTIFICATION {
     def transcripts = "${data}/detected_transcripts.csv"
     def vzg_update = "updated_${vzg ? vzg.getName() : '.vzg'}"
 
+    // """
+    // export HOME=$PWD
+    // export CELLPOSE_LOCAL_MODELS_PATH=/ei/projects/0/05407428-a659-41d6-a7bd-4567bf45e494/data/vizgen/models
+    // export CELLPOSE_LOCAL_MODELS_PATH=/home/wuhh/.cellpose/models
+
     """
-    export HOME=$PWD
-    export CELLPOSE_LOCAL_MODELS_PATH=/ei/projects/0/05407428-a659-41d6-a7bd-4567bf45e494/data/vizgen/models
 
     cp -n ${transformation} .
 
